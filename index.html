@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="es-MX">
+<html lang="es-MX" class="no-js">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>EDUVO — Tu planeación de la semana, lista antes del lunes</title>
 <meta name="description" content="EDUVO entrega planeaciones didácticas completas, actividades, materiales y evaluaciones alineadas a la Nueva Escuela Mexicana. Hechas para tu grupo, listas para usar. Habla con nosotros por WhatsApp.">
+<meta name="theme-color" content="#14342B">
+<link rel="canonical" href="https://asternodelab.github.io/eduvo-landing/">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+<!-- Vista previa al compartir (WhatsApp, Facebook, X) -->
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_MX">
+<meta property="og:site_name" content="EDUVO">
+<meta property="og:title" content="EDUVO — Tu planeación de la semana, lista antes del lunes">
+<meta property="og:description" content="Planeaciones completas, actividades, materiales y evaluaciones alineadas a la NEM. Hechas para tu grupo, listas para usar.">
+<meta property="og:url" content="https://asternodelab.github.io/eduvo-landing/">
+<meta property="og:image" content="https://asternodelab.github.io/eduvo-landing/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="EDUVO: tu planeación de la semana, lista antes del lunes">
+<meta name="twitter:card" content="summary_large_image">
+
+<script>document.documentElement.classList.replace("no-js","js")</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300..800&family=Figtree:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -22,6 +41,7 @@
   --tinta-suave:#5B6660;     /* texto secundario */
   --cempasuchil:#F0A63A;     /* ámbar cempasúchil */
   --cempasuchil-2:#E08E1B;
+  --cempasuchil-tx:#B96A0B;  /* ámbar para texto chico sobre papel (contraste AA) */
   --rosa:#D4557B;            /* rosa mexicano, uso mínimo */
   --salvia:#DCE7DD;          /* bordes suaves */
   --blanco:#FFFFFF;
@@ -35,10 +55,13 @@
   --font-display:"Bricolage Grotesque",system-ui,sans-serif;
   --font-body:"Figtree",system-ui,sans-serif;
   --font-mono:"DM Mono",ui-monospace,monospace;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-spring:cubic-bezier(.34,1.56,.64,1);
   --maxw:1180px;
+  --nav-h:74px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--nav-h) + 14px);-webkit-text-size-adjust:100%}
 body{
   font-family:var(--font-body);
   color:var(--tinta);
@@ -47,196 +70,315 @@ body{
   -webkit-font-smoothing:antialiased;
   overflow-x:hidden;
 }
+body.menu-abierto{overflow:hidden}
 img,svg{display:block;max-width:100%}
 a{color:inherit;text-decoration:none}
-button{font-family:inherit;cursor:pointer;border:none;background:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 :focus-visible{outline:3px solid var(--cempasuchil);outline-offset:3px;border-radius:6px}
 ::selection{background:var(--cempasuchil);color:var(--pizarron-3)}
+
+.skip{
+  position:fixed;left:16px;top:-60px;z-index:200;background:var(--cempasuchil);color:var(--pizarron-3);
+  font-weight:700;padding:10px 18px;border-radius:100px;transition:top .2s ease;
+}
+.skip:focus{top:12px}
 
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 .eyebrow{
   font-family:var(--font-mono);font-size:.78rem;letter-spacing:.14em;
-  text-transform:uppercase;color:var(--cempasuchil-2);font-weight:500;
+  text-transform:uppercase;color:var(--cempasuchil-tx);font-weight:500;
   display:inline-flex;align-items:center;gap:.6em;
 }
-.eyebrow::before{content:"";width:26px;height:2px;background:var(--cempasuchil);border-radius:2px}
+.eyebrow::before{content:"";width:26px;height:2px;background:var(--cempasuchil);border-radius:2px;flex:none;transform-origin:0 50%}
+.eyebrow.claro{color:var(--cempasuchil)}
 h1,h2,h3{font-family:var(--font-display);line-height:1.08;letter-spacing:-.015em;font-weight:600}
-h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
+h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3);margin-top:14px}
 .section{padding:clamp(72px,9vw,120px) 0}
+.sec-papel{background:var(--papel-2)}
 .section-head{max-width:640px;margin-bottom:clamp(36px,5vw,60px)}
 .section-head p{margin-top:14px;color:var(--tinta-suave);font-size:1.08rem}
 
+/* ---------- Barra de progreso de lectura ---------- */
+.progreso{
+  position:fixed;top:0;left:0;right:0;height:3px;z-index:95;pointer-events:none;
+  transform-origin:0 50%;transform:scaleX(0);
+  background:linear-gradient(90deg,var(--cempasuchil),var(--cempasuchil-2));
+  box-shadow:0 0 12px rgba(240,166,58,.55);
+}
+
 /* ---------- Botones ---------- */
 .btn{
+  position:relative;overflow:hidden;isolation:isolate;
   display:inline-flex;align-items:center;gap:.6em;
   font-weight:700;font-size:1rem;border-radius:100px;
-  padding:15px 28px;transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s ease,background .2s ease;
-  will-change:transform;
+  padding:15px 28px;
+  transition:transform .22s var(--ease-spring),box-shadow .22s ease,background .2s ease,color .2s ease,border-color .2s ease,translate .35s var(--ease-out);
 }
 .btn:active{transform:scale(.97)}
 .btn-wa{background:var(--wa);color:#06301A;box-shadow:0 8px 24px rgba(37,211,102,.35)}
 .btn-wa:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(37,211,102,.45);background:#2BE372}
+.btn-wa::after{ /* destello que cruza el botón */
+  content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+  background:linear-gradient(105deg,transparent 32%,rgba(255,255,255,.5) 50%,transparent 68%);
+  transform:translateX(-130%);
+}
+.btn-wa:hover::after{transform:translateX(130%);transition:transform .8s ease}
+.hero .btn-wa::after{animation:destello 5.5s ease-in-out 2.4s infinite}
+@keyframes destello{0%,78%{transform:translateX(-130%)}100%{transform:translateX(130%)}}
 .btn-ghost{background:transparent;color:var(--papel);border:1.5px solid rgba(251,248,241,.35)}
 .btn-ghost:hover{border-color:var(--cempasuchil);color:var(--cempasuchil);transform:translateY(-2px)}
 .btn-dark{background:var(--pizarron);color:var(--papel)}
 .btn-dark:hover{background:var(--pizarron-2);transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.wa-ico{width:20px;height:20px;flex:none}
+.wa-ico{width:20px;height:20px;flex:none;fill:currentColor}
 
 /* ---------- Navbar ---------- */
 .nav{
   position:fixed;top:0;left:0;right:0;z-index:90;
   transition:background .3s ease,box-shadow .3s ease,backdrop-filter .3s ease;
 }
-.nav.scrolled{background:rgba(251,248,241,.88);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(20,52,43,.08)}
-.nav-inner{display:flex;align-items:center;justify-content:space-between;height:74px}
+.nav.scrolled{background:rgba(251,248,241,.88);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 1px 0 rgba(20,52,43,.08)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:var(--nav-h)}
 .logo{display:flex;align-items:center;gap:11px}
-.logo-mark{width:40px;height:40px}
-.logo-word{font-family:var(--font-display);font-weight:700;font-size:1.42rem;letter-spacing:.02em;color:var(--pizarron-3)}
+.logo-mark{width:40px;height:40px;transition:transform .5s var(--ease-spring)}
+.logo:hover .logo-mark{transform:rotate(-8deg) scale(1.06)}
+.logo-word{font-family:var(--font-display);font-weight:700;font-size:1.42rem;letter-spacing:.02em;color:var(--pizarron-3);transition:color .3s ease}
 .logo-word em{font-style:normal;color:var(--cempasuchil-2)}
 .nav-links{display:flex;gap:30px;align-items:center}
-.nav-links a{font-weight:600;font-size:.95rem;color:var(--tinta);position:relative}
+.nav-links a{font-weight:600;font-size:.95rem;color:var(--tinta);position:relative;transition:color .3s ease}
 .nav-links a:not(.btn)::after{
-  content:"";position:absolute;left:0;bottom:-5px;width:0;height:2px;
-  background:var(--cempasuchil);border-radius:2px;transition:width .25s ease;
+  content:"";position:absolute;left:0;bottom:-5px;width:100%;height:2px;
+  background:var(--cempasuchil);border-radius:2px;transform:scaleX(0);transform-origin:0 50%;
+  transition:transform .3s var(--ease-out);
 }
-.nav-links a:not(.btn):hover::after{width:100%}
+.nav-links a:not(.btn):hover::after,.nav-links a.activo::after{transform:scaleX(1)}
 .nav .btn{padding:10px 20px;font-size:.92rem}
 .nav.on-dark .nav-links a:not(.btn){color:var(--papel)}
 .nav.on-dark .logo-word{color:var(--papel)}
 .nav.on-dark.scrolled .nav-links a:not(.btn){color:var(--tinta)}
 .nav.on-dark.scrolled .logo-word{color:var(--pizarron-3)}
 .menu-btn{display:none;width:44px;height:44px;border-radius:12px;align-items:center;justify-content:center}
-.menu-btn svg{width:26px;height:26px;stroke:var(--papel)}
+.menu-btn svg{width:26px;height:26px;stroke:var(--papel);transition:stroke .3s ease}
 .nav.scrolled .menu-btn svg{stroke:var(--pizarron-3)}
+
+/* ---------- Menú móvil ---------- */
 .mobile-menu{
-  display:none;position:fixed;inset:0;z-index:100;background:var(--pizarron-3);
-  flex-direction:column;padding:26px 24px;gap:6px;
+  display:flex;position:fixed;inset:0;z-index:100;background:var(--pizarron-3);
+  flex-direction:column;padding:16px 24px calc(26px + env(safe-area-inset-bottom));gap:6px;
+  opacity:0;visibility:hidden;transform:translateY(-14px);
+  transition:opacity .35s var(--ease-out),transform .45s var(--ease-out),visibility 0s linear .45s;
 }
-.mobile-menu.open{display:flex}
-.mobile-menu a{color:var(--papel);font-family:var(--font-display);font-size:1.7rem;font-weight:600;padding:14px 4px;border-bottom:1px solid rgba(251,248,241,.1)}
-.mobile-menu .close-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.mobile-menu .btn{margin-top:auto;justify-content:center}
+.mobile-menu.open{opacity:1;visibility:visible;transform:none;transition:opacity .35s var(--ease-out),transform .45s var(--ease-out),visibility 0s}
+.mobile-menu::before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(rgba(251,248,241,.05) 1px,transparent 1px);background-size:26px 26px}
+.mobile-menu > *{position:relative}
+.mobile-menu a:not(.btn){
+  color:var(--papel);font-family:var(--font-display);font-size:1.7rem;font-weight:600;
+  padding:14px 4px;border-bottom:1px solid rgba(251,248,241,.1);
+  opacity:0;transform:translateY(16px);transition:opacity .45s var(--ease-out),transform .45s var(--ease-out),color .2s ease;
+}
+.mobile-menu a:not(.btn):hover{color:var(--cempasuchil)}
+.mobile-menu.open a:not(.btn){opacity:1;transform:none;transition-delay:calc(var(--i,0) * 55ms + 90ms)}
+.mobile-menu .close-row{display:flex;justify-content:space-between;align-items:center;height:calc(var(--nav-h) - 16px);margin-bottom:14px}
+.mobile-menu .close-row .menu-btn{display:flex}
+.mobile-menu .close-row .menu-btn svg{stroke:var(--papel)}
+.mobile-menu .btn{margin-top:auto;justify-content:center;font-size:1.05rem;padding:17px 28px}
 
 /* ---------- Hero ---------- */
 .hero{
   position:relative;background:var(--pizarron);color:var(--papel);
-  padding:calc(74px + clamp(48px,7vw,90px)) 0 clamp(64px,8vw,110px);
-  overflow:hidden;
+  padding:calc(var(--nav-h) + clamp(48px,7vw,90px)) 0 clamp(72px,8vw,118px);
+  overflow:hidden;isolation:isolate;
 }
-.hero::before{ /* trama de gis sutil */
-  content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+.hero-trama{ /* trama de gis sutil */
+  position:absolute;inset:-40px;opacity:.5;pointer-events:none;z-index:-1;
   background-image:radial-gradient(rgba(251,248,241,.05) 1px,transparent 1px);
   background-size:26px 26px;
 }
-.hero::after{ /* halo cempasúchil */
-  content:"";position:absolute;width:720px;height:720px;border-radius:50%;
-  background:radial-gradient(circle,rgba(240,166,58,.16),transparent 62%);
-  top:-220px;right:-180px;pointer-events:none;
+.hero-halo{ /* halo cempasúchil */
+  position:absolute;width:720px;height:720px;border-radius:50%;pointer-events:none;z-index:-1;
+  background:radial-gradient(circle,rgba(240,166,58,.17),transparent 62%);
+  top:-220px;right:-180px;
 }
-.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(36px,5vw,72px);align-items:center;position:relative;z-index:2}
-.hero h1{font-size:clamp(2.5rem,5.4vw,4.1rem);font-weight:700;color:var(--papel)}
+.hero-polvo{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+.hero-grid{display:grid;grid-template-columns:1.02fr .98fr;gap:clamp(36px,5vw,72px);align-items:center;position:relative}
+.hero-copy{will-change:transform,opacity}
+.hero h1{font-size:clamp(2.5rem,5.4vw,4.1rem);font-weight:700;color:var(--papel);margin-top:18px}
+/* Titular: cada palabra se levanta en 3D */
+.hero h1 .w{display:inline-block;perspective:700px}
+.hero h1 .w > span{
+  display:inline-block;transform-origin:50% 100%;
+  opacity:0;transform:translateY(.45em) rotateX(-75deg);
+  animation:palabra .95s var(--ease-out) forwards;animation-delay:calc(.12s + var(--i) * 65ms);
+}
+@keyframes palabra{to{opacity:1;transform:none}}
 .hero h1 .subrayado{position:relative;white-space:nowrap;color:var(--cempasuchil)}
 .hero h1 .subrayado svg{position:absolute;left:0;bottom:-.14em;width:100%;height:.34em;overflow:visible}
 .hero h1 .subrayado path{stroke:var(--cempasuchil);stroke-width:7;fill:none;stroke-linecap:round;
-  stroke-dasharray:600;stroke-dashoffset:600;animation:trazo 1s ease .9s forwards}
+  stroke-dasharray:600;stroke-dashoffset:600;animation:trazo 1s var(--ease-out) 1.05s forwards}
 @keyframes trazo{to{stroke-dashoffset:0}}
 .hero-sub{margin:22px 0 32px;font-size:clamp(1.05rem,1.6vw,1.22rem);color:rgba(251,248,241,.82);max-width:520px}
 .hero-ctas{display:flex;gap:14px;flex-wrap:wrap}
 .hero-proof{display:flex;gap:26px;margin-top:40px;flex-wrap:wrap}
+.hero-proof div{position:relative;padding-left:14px}
+.hero-proof div::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:2px;border-radius:2px;background:rgba(240,166,58,.35)}
 .hero-proof div strong{font-family:var(--font-display);font-size:1.35rem;color:var(--cempasuchil);display:block;font-weight:700}
 .hero-proof div span{font-size:.85rem;color:rgba(251,248,241,.65)}
-.rise{opacity:0;transform:translateY(26px);animation:rise .8s cubic-bezier(.22,1,.36,1) forwards}
-.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.2s}.rise.d3{animation-delay:.34s}.rise.d4{animation-delay:.48s}
+.rise{opacity:0;transform:translateY(26px);animation:rise .85s var(--ease-out) forwards}
+.rise.d1{animation-delay:.05s}.rise.d2{animation-delay:.2s}.rise.d3{animation-delay:.5s}.rise.d4{animation-delay:.66s}.rise.d5{animation-delay:.8s}
 @keyframes rise{to{opacity:1;transform:none}}
+.scroll-hint{
+  position:absolute;left:50%;bottom:20px;z-index:3;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:.64rem;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(251,248,241,.45);transition:color .2s ease;
+}
+.scroll-hint:hover{color:var(--cempasuchil)}
+.scroll-hint i{width:1.5px;height:34px;border-radius:2px;background:linear-gradient(var(--cempasuchil),transparent);transform-origin:50% 0;animation:bajar 2.2s ease-in-out infinite}
+@keyframes bajar{0%{transform:scaleY(0);opacity:1}55%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
 
-/* --- Elemento firma: la planeación que se escribe sola --- */
-.plan-stage{position:relative;perspective:1400px}
+/* --- Elemento firma: la planeación que se escribe sola, ahora en 3D --- */
+.plan-stage{position:relative;perspective:1600px;perspective-origin:50% 35%}
+.plan-3d{position:relative;transform-style:preserve-3d;transform:rotateX(4deg) rotateY(-7deg);will-change:transform}
+.hoja{ /* hojas de la semana apiladas detrás de la planeación */
+  position:absolute;inset:0;border-radius:var(--radius-lg);pointer-events:none;
+  background-color:var(--papel-2);
+  background-image:repeating-linear-gradient(180deg,transparent 0 27px,rgba(20,52,43,.07) 27px 28px);
+  box-shadow:0 20px 50px rgba(0,0,0,.28);
+}
+.hoja-1{transform:translate3d(14px,-12px,-40px) rotateZ(2.5deg)}
+.hoja-2{background-color:#EAE2CF;transform:translate3d(28px,-22px,-80px) rotateZ(5deg)}
+.hoja-2::after{ /* pestaña de color que asoma */
+  content:"";position:absolute;top:18%;right:-7px;width:14px;height:44px;border-radius:6px;background:var(--rosa);opacity:.85;
+}
+.hoja-1::after{content:"";position:absolute;top:38%;right:-7px;width:14px;height:44px;border-radius:6px;background:var(--cempasuchil)}
 .plan-card{
   background:var(--papel);color:var(--tinta);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-lg);padding:26px 26px 22px;
-  transform-style:preserve-3d;transform:rotateX(4deg) rotateY(-7deg);
-  transition:transform .5s cubic-bezier(.22,1,.36,1);
-  position:relative;
+  box-shadow:var(--shadow-lg),0 1px 0 rgba(255,255,255,.6) inset;padding:26px 26px 22px;
+  position:relative;transform-style:preserve-3d;
 }
 .plan-card::before{ /* espiral de cuaderno */
   content:"";position:absolute;top:20px;bottom:20px;left:-9px;width:18px;
   background-image:radial-gradient(circle 6px at 9px 10px,var(--pizarron-2) 42%,transparent 46%);
   background-size:18px 34px;background-repeat:repeat-y;opacity:.9;
 }
-.plan-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;padding-left:10px}
+.brillo{ /* reflejo de luz que sigue al cursor */
+  position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(560px circle at var(--gx,78%) var(--gy,6%),rgba(255,255,255,.85),rgba(255,255,255,0) 45%),
+             linear-gradient(120deg,rgba(20,52,43,0) 45%,rgba(20,52,43,.045));
+}
+.plan-top{display:flex;justify-content:flex-start;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-bottom:16px;padding:0 90px 0 10px;position:relative}
 .plan-top .tag{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;
   background:var(--pizarron);color:var(--cempasuchil);padding:5px 12px;border-radius:100px}
-.plan-top .grado{font-family:var(--font-display);font-weight:700;color:var(--pizarron-2);font-size:.95rem}
-.plan-title{font-family:var(--font-display);font-weight:700;font-size:1.22rem;color:var(--pizarron-3);padding-left:10px;margin-bottom:14px}
-.plan-rows{display:flex;flex-direction:column;gap:9px;padding-left:10px}
+.plan-top .grado{font-family:var(--font-display);font-weight:700;color:var(--pizarron-2);font-size:.95rem;display:inline-block;transform-origin:50% 50%}
+.plan-top .grado.flip{animation:flipGrado .7s var(--ease-out)}
+@keyframes flipGrado{0%{transform:rotateX(90deg);opacity:0}100%{transform:none;opacity:1}}
+.plan-title{font-family:var(--font-display);font-weight:700;font-size:1.22rem;color:var(--pizarron-3);padding-left:10px;margin-bottom:14px;position:relative;transition:opacity .3s ease}
+.plan-title.borra{opacity:0}
+.plan-title.escribiendo::after{
+  content:"";display:inline-block;width:2px;height:1em;margin-left:3px;vertical-align:-.12em;
+  background:var(--cempasuchil-2);animation:cursor .75s steps(1) infinite;
+}
+@keyframes cursor{50%{opacity:0}}
+.plan-rows{display:flex;flex-direction:column;gap:9px;padding-left:10px;position:relative;transform-style:preserve-3d}
 .plan-row{
   display:grid;grid-template-columns:52px 1fr 26px;gap:12px;align-items:center;
   background:var(--blanco);border:1px solid var(--salvia);border-radius:13px;padding:11px 14px;
-  opacity:0;transform:translateX(-14px);
+  box-shadow:0 1px 0 rgba(20,52,43,.03);
 }
-.plan-row.show{animation:rowIn .5s cubic-bezier(.22,1,.36,1) forwards}
-@keyframes rowIn{to{opacity:1;transform:none}}
-.plan-row .dia{font-family:var(--font-mono);font-size:.7rem;font-weight:500;letter-spacing:.06em;color:var(--cempasuchil-2);text-transform:uppercase}
-.plan-row .linea{font-size:.86rem;color:var(--tinta);white-space:nowrap;overflow:hidden}
+.js .plan-row{opacity:0;transform:translate3d(-14px,0,0)}
+.js .plan-row.show{animation:rowIn .55s var(--ease-out) forwards}
+.js .plan-row.sale{animation:rowOut .38s ease forwards}
+@keyframes rowIn{from{opacity:0;transform:translate3d(-14px,0,0)}to{opacity:1;transform:translate3d(0,0,14px);box-shadow:0 8px 18px rgba(20,52,43,.08)}}
+@keyframes rowOut{from{opacity:1;transform:translate3d(0,0,14px)}to{opacity:0;transform:translate3d(18px,0,0)}}
+.plan-row .dia{font-family:var(--font-mono);font-size:.7rem;font-weight:500;letter-spacing:.06em;color:var(--cempasuchil-tx);text-transform:uppercase}
+.plan-row .linea{font-size:.86rem;line-height:1.35;color:var(--tinta)}
 .plan-row .linea b{font-weight:700;color:var(--pizarron-2)}
 .plan-row .check{
   width:24px;height:24px;border-radius:50%;background:var(--salvia);
-  display:flex;align-items:center;justify-content:center;transform:scale(0);
+  display:flex;align-items:center;justify-content:center;
 }
-.plan-row .check.on{animation:pop .4s cubic-bezier(.34,1.6,.64,1) forwards}
-@keyframes pop{to{transform:scale(1)}}
-.plan-row .check svg{width:13px;height:13px;stroke:var(--pizarron-2);stroke-width:3}
-.plan-foot{display:flex;align-items:center;gap:9px;margin-top:16px;padding-left:10px;font-size:.82rem;color:var(--tinta-suave)}
+.js .plan-row .check{transform:scale(0)}
+.js .plan-row .check.on{animation:pop .45s var(--ease-spring) forwards}
+@keyframes pop{0%{transform:scale(0)}100%{transform:scale(1);background:#CFE6D3}}
+.plan-row .check svg{width:13px;height:13px;stroke:var(--pizarron-2);stroke-width:3;fill:none}
+.plan-foot{display:flex;align-items:center;gap:9px;margin-top:16px;padding-left:10px;position:relative;font-size:.82rem;color:var(--tinta-suave)}
 .plan-foot .sello{
   width:34px;height:34px;border-radius:50%;background:var(--cempasuchil);
   display:flex;align-items:center;justify-content:center;flex:none;
   box-shadow:0 4px 12px rgba(240,166,58,.4);
 }
-.plan-foot .sello svg{width:18px;height:18px}
-/* búho flotante junto a la planeación */
-.buho-flotante{
-  position:absolute;width:118px;top:-58px;right:-16px;z-index:3;
-  filter:drop-shadow(0 14px 26px rgba(14,38,32,.35));
-  animation:flotar 5.5s ease-in-out infinite;
-}
+.plan-foot .sello.estampa{animation:estampa .6s var(--ease-spring)}
+@keyframes estampa{0%{transform:scale(1.7) rotate(-25deg);opacity:.2}60%{transform:scale(.92) rotate(4deg);opacity:1}100%{transform:none}}
+.plan-foot .sello svg{width:18px;height:18px;stroke:#14342B;stroke-width:2.4;fill:none}
+/* búho y chips flotan por delante, a distinta profundidad */
+.z-buho{position:absolute;width:118px;top:-64px;right:-24px;z-index:3;transform:translateZ(80px);pointer-events:none}
+.buho-flotante{width:100%;filter:drop-shadow(0 14px 26px rgba(14,38,32,.35));animation:flotar 5.5s ease-in-out infinite}
 @keyframes flotar{0%,100%{transform:translateY(0) rotate(-3deg)}50%{transform:translateY(-13px) rotate(2deg)}}
+.z-chip{position:absolute;z-index:3;transform:translateZ(110px);pointer-events:none}
 .chip-flotante{
-  position:absolute;background:var(--blanco);border-radius:14px;box-shadow:var(--shadow-md);
-  padding:10px 15px;display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:600;color:var(--tinta);
-  animation:flotar 6s ease-in-out infinite;z-index:3;
+  background:var(--blanco);border-radius:14px;box-shadow:0 16px 36px rgba(14,38,32,.28);
+  padding:10px 15px;display:flex;align-items:center;gap:9px;font-size:.82rem;font-weight:600;color:var(--tinta);white-space:nowrap;
+  animation:flotar 6s ease-in-out infinite;
 }
-.chip-flotante .dot{width:9px;height:9px;border-radius:50%;background:var(--wa);flex:none;box-shadow:0 0 0 4px rgba(37,211,102,.2)}
-.chip-a{bottom:-20px;left:-26px;animation-delay:.8s}
-.chip-b{top:38%;right:-34px;animation-delay:1.6s}
+.chip-flotante .dot{width:9px;height:9px;border-radius:50%;background:var(--wa);flex:none;box-shadow:0 0 0 4px rgba(37,211,102,.2);animation:latido 2s ease-in-out infinite}
+@keyframes latido{50%{box-shadow:0 0 0 7px rgba(37,211,102,.08)}}
+.chip-a{bottom:-24px;right:-20px}
+.chip-a .chip-flotante{animation-delay:.8s}
+.chip-b{top:-22px;left:-34px}
+.chip-b .chip-flotante{animation-delay:1.6s}
 .chip-b .dot{background:var(--cempasuchil);box-shadow:0 0 0 4px rgba(240,166,58,.22)}
 
+/* ---------- Búho vivo (ojos que siguen al cursor, parpadeo) ---------- */
+.buho .parpado{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(0)}
+.buho .parpado.parpadea{animation:parpadeo .26s ease-in-out}
+@keyframes parpadeo{50%{transform:scaleY(1)}}
+
 /* ---------- Franja NEM (marquee) ---------- */
-.franja{background:var(--pizarron-3);color:rgba(251,248,241,.8);padding:15px 0;overflow:hidden;border-top:1px solid rgba(251,248,241,.08)}
-.marquee{display:flex;gap:0;width:max-content;animation:marquee 34s linear infinite}
+.franja{
+  background:var(--pizarron-3);color:rgba(251,248,241,.8);padding:15px 0;overflow:hidden;border-top:1px solid rgba(251,248,241,.08);
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);
+}
+.marquee{display:flex;width:max-content;animation:marquee 44s linear infinite}
+.franja:hover .marquee{animation-play-state:paused}
 .marquee-set{display:flex;align-items:center;gap:44px;padding-right:44px;font-family:var(--font-mono);font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
 .marquee-set span{display:flex;align-items:center;gap:44px}
 .marquee-set i{font-style:normal;color:var(--cempasuchil);font-size:.6rem}
 @keyframes marquee{to{transform:translateX(-50%)}}
 
-/* ---------- Reveal on scroll ---------- */
-.reveal{opacity:0;transform:translateY(34px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
-.reveal.in{opacity:1;transform:none}
+/* ---------- Reveal on scroll (en 3D) ---------- */
+.js .reveal{
+  opacity:0;translate:0 38px;rotate:x 9deg;transform-origin:50% 100%;
+  transition:opacity .9s var(--ease-out),translate .9s var(--ease-out),rotate .9s var(--ease-out),
+             box-shadow .35s ease,border-color .45s ease,background-color .45s ease;
+}
+.js .reveal.in{opacity:1;translate:0 0;rotate:x 0deg}
+.js .reveal .eyebrow::before{transform:scaleX(0);transition:transform .8s var(--ease-out) .35s}
+.js .reveal.in .eyebrow::before{transform:scaleX(1)}
+.cards,.pasos,.conf-grid,.testis{perspective:1400px}
+
+/* Destello que sigue al cursor en tarjetas */
+.spot{position:relative}
+.spot::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;opacity:0;transition:opacity .4s ease;
+  background:radial-gradient(420px circle at var(--sx,50%) var(--sy,50%),var(--spot,rgba(240,166,58,.14)),transparent 60%);
+}
+.spot:hover::after{opacity:1}
+[data-tilt]{will-change:transform}
 
 /* ---------- Qué recibes ---------- */
 .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .card{
   background:var(--blanco);border:1px solid var(--salvia);border-radius:var(--radius-lg);
   padding:30px 28px;position:relative;overflow:hidden;
-  transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease,border-color .3s ease;
-  transform-style:preserve-3d;
+  transition:box-shadow .35s ease,border-color .3s ease;
 }
-.card:hover{transform:translateY(-7px);box-shadow:var(--shadow-md);border-color:rgba(240,166,58,.5)}
+.card:hover{box-shadow:0 22px 48px rgba(20,52,43,.14);border-color:rgba(240,166,58,.5)}
 .card .ico{
   width:52px;height:52px;border-radius:15px;background:var(--papel-2);
   display:flex;align-items:center;justify-content:center;margin-bottom:20px;
-  transition:transform .35s cubic-bezier(.34,1.56,.64,1),background .3s ease;
+  transition:transform .45s var(--ease-spring),background .3s ease;
 }
-.card:hover .ico{transform:rotate(-6deg) scale(1.08);background:#FBEFD8}
+.card:hover .ico{transform:rotate(-6deg) scale(1.1);background:#FBEFD8}
 .card .ico svg{width:26px;height:26px;stroke:var(--pizarron-2);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .card h3{font-size:1.18rem;margin-bottom:9px;color:var(--pizarron-3)}
 .card p{font-size:.94rem;color:var(--tinta-suave)}
@@ -246,78 +388,172 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   transition:border-top-color .3s ease;
 }
 .card:hover .pico{border-top-color:var(--cempasuchil)}
+.card .num-card{position:absolute;top:22px;right:52px;font-family:var(--font-mono);font-size:.7rem;letter-spacing:.1em;color:rgba(20,52,43,.28)}
 
 /* ---------- Cómo funciona ---------- */
 .pasos-sec{background:var(--pizarron);color:var(--papel);position:relative;overflow:hidden}
-.pasos-sec::before{content:"";position:absolute;inset:0;opacity:.45;
+.pasos-sec::before{content:"";position:absolute;inset:0;opacity:.45;pointer-events:none;
   background-image:radial-gradient(rgba(251,248,241,.05) 1px,transparent 1px);background-size:26px 26px}
 .pasos-sec h2{color:var(--papel)}
 .pasos-sec .section-head p{color:rgba(251,248,241,.7)}
-.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;position:relative;z-index:1}
+.pasos-wrap{position:relative;z-index:1}
+.pasos{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;position:relative}
 .paso{
+  --spot:rgba(240,166,58,.12);
   background:rgba(251,248,241,.05);border:1px solid rgba(251,248,241,.13);
   border-radius:var(--radius-lg);padding:34px 28px;position:relative;
-  transition:background .3s ease,transform .35s cubic-bezier(.22,1,.36,1);
+  transition:background .3s ease,border-color .45s ease;
 }
-.paso:hover{background:rgba(251,248,241,.09);transform:translateY(-5px)}
+.paso:hover{background:rgba(251,248,241,.09)}
 .paso .num{
   font-family:var(--font-display);font-weight:700;font-size:2.6rem;color:var(--cempasuchil);
   line-height:1;margin-bottom:18px;display:flex;align-items:baseline;gap:10px;
+  transition:color .5s ease,text-shadow .5s ease;
 }
 .paso .num small{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(251,248,241,.5);font-weight:400}
 .paso h3{font-size:1.2rem;color:var(--papel);margin-bottom:10px}
 .paso p{font-size:.94rem;color:rgba(251,248,241,.72)}
-.paso .flecha{position:absolute;top:50%;right:-19px;transform:translateY(-50%);z-index:2}
-.paso .flecha svg{width:30px;height:30px;stroke:var(--cempasuchil);stroke-width:2;fill:none}
+/* La ruta: un avión de papel lleva tu planeación paso a paso mientras bajas */
+.ruta{position:relative;height:64px;margin-bottom:10px}
+.no-js .ruta{display:none}
+.ruta-riel{
+  position:absolute;top:50%;height:2px;margin-top:-1px;left:var(--a,16%);width:calc(var(--b,84%) - var(--a,16%));
+  background-image:linear-gradient(90deg,rgba(251,248,241,.3) 50%,transparent 0);background-size:14px 2px;
+}
+.ruta-fill{
+  position:absolute;inset:0;border-radius:2px;background:var(--cempasuchil);
+  box-shadow:0 0 14px rgba(240,166,58,.6);transform-origin:0 50%;
+}
+.ruta-activa .ruta-fill{transform:scaleX(0)}
+.ruta-nodo{
+  position:absolute;top:50%;left:var(--pos,50%);width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  background:var(--pizarron);border:2px solid var(--cempasuchil);
+  transition:background .4s ease,border-color .4s ease,box-shadow .4s ease,transform .5s var(--ease-spring);
+}
+.ruta-nodo.lit{background:var(--cempasuchil);transform:scale(1.2);box-shadow:0 0 0 7px rgba(240,166,58,.16)}
+.ruta-activa .ruta-nodo:not(.lit){border-color:rgba(251,248,241,.3)}
+.avion{position:absolute;left:0;top:50%;width:46px;height:46px;margin:-23px 0 0 -23px;z-index:2;display:none;will-change:transform}
+.ruta-activa .avion{display:block}
+.avion .gira{width:100%;height:100%}
+.avion svg{width:100%;height:100%;animation:vuelo 2.6s ease-in-out infinite;filter:drop-shadow(0 8px 10px rgba(0,0,0,.35))}
+@keyframes vuelo{0%,100%{transform:translateY(-3px) rotate(-5deg)}50%{transform:translateY(3px) rotate(3deg)}}
+.ruta-activa .paso{border-color:rgba(251,248,241,.1)}
+.ruta-activa .paso .num{color:rgba(240,166,58,.38)}
+.ruta-activa .paso.lit{border-color:rgba(240,166,58,.42);background:rgba(251,248,241,.075)}
+.ruta-activa .paso.lit .num{color:var(--cempasuchil);text-shadow:0 0 26px rgba(240,166,58,.45)}
 .pasos-cta{text-align:center;margin-top:52px;position:relative;z-index:1}
 
 /* ---------- Beneficios ---------- */
 .benef-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(36px,5vw,70px);align-items:center}
 .benef-lista{display:flex;flex-direction:column;gap:8px;margin-top:26px}
-.benef-item{display:flex;gap:16px;padding:16px 18px;border-radius:16px;transition:background .25s ease}
-.benef-item:hover{background:var(--blanco)}
+.benef-item{display:flex;gap:16px;padding:16px 18px;border-radius:16px;transition:background-color .25s ease,box-shadow .25s ease}
+.benef-item:hover{background:var(--blanco);box-shadow:var(--shadow-sm)}
+.js .reveal .benef-item{
+  opacity:0;translate:-22px 0;
+  transition:opacity .7s var(--ease-out) var(--dl,0s),translate .7s var(--ease-out) var(--dl,0s),background-color .25s ease,box-shadow .25s ease;
+}
+.js .reveal.in .benef-item{opacity:1;translate:0 0}
+.benef-item:nth-child(1){--dl:.25s}.benef-item:nth-child(2){--dl:.35s}.benef-item:nth-child(3){--dl:.45s}.benef-item:nth-child(4){--dl:.55s}
 .benef-item .bico{
   width:42px;height:42px;border-radius:12px;background:#FBEFD8;flex:none;
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease-spring);
 }
+.benef-item:hover .bico{transform:rotate(-8deg) scale(1.08)}
 .benef-item .bico svg{width:21px;height:21px;stroke:var(--cempasuchil-2);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round}
-.benef-item h4{font-family:var(--font-display);font-size:1.02rem;color:var(--pizarron-3)}
+.benef-item h3{font-family:var(--font-display);font-size:1.02rem;font-weight:700;line-height:1.5;letter-spacing:0;color:var(--pizarron-3)}
 .benef-item p{font-size:.9rem;color:var(--tinta-suave)}
+.pizarra-stage{perspective:1400px}
 .pizarra-domingo{
-  background:var(--pizarron);border-radius:var(--radius-lg);padding:clamp(30px,4vw,48px);
+  background:var(--pizarron);border-radius:var(--radius-lg);padding:clamp(30px,4vw,48px) clamp(30px,4vw,48px) clamp(44px,5vw,60px);
   color:var(--papel);position:relative;overflow:hidden;box-shadow:var(--shadow-lg);
   border:10px solid #0B1E19;
 }
-.pizarra-domingo::before{content:"";position:absolute;inset:0;
+.pizarra-domingo::before{content:"";position:absolute;inset:0;pointer-events:none;
   background-image:radial-gradient(rgba(251,248,241,.06) 1px,transparent 1px);background-size:22px 22px}
+.pizarra-domingo::after{ /* polvo de gis borrado */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(60% 40% at 20% 30%,rgba(251,248,241,.05),transparent 70%),radial-gradient(50% 35% at 80% 75%,rgba(251,248,241,.04),transparent 70%);
+}
 .pizarra-domingo .gis-titulo{font-family:var(--font-display);font-weight:600;font-size:clamp(1.5rem,2.6vw,2rem);position:relative}
-.pizarra-domingo .tachado{position:relative;color:rgba(251,248,241,.5)}
-.pizarra-domingo .tachado::after{content:"";position:absolute;left:-2%;top:52%;width:104%;height:3px;background:var(--rosa);border-radius:3px;transform:rotate(-2deg)}
+.pizarra-domingo .tachado{
+  color:rgba(251,248,241,.5);
+  background:linear-gradient(var(--rosa),var(--rosa)) no-repeat 0 60% / 100% 3px;
+  -webkit-box-decoration-break:clone;box-decoration-break:clone;
+}
+.js .reveal .pizarra-domingo .tachado{color:var(--papel);background-size:0% 3px;transition:background-size .8s var(--ease-out) .55s,color .6s ease .7s}
+.js .reveal.in .pizarra-domingo .tachado{color:rgba(251,248,241,.5);background-size:100% 3px}
 .pizarra-domingo .gis-sub{color:var(--cempasuchil);font-family:var(--font-display);font-weight:700;font-size:clamp(1.7rem,3vw,2.3rem);margin-top:10px;position:relative}
-.pizarra-domingo .horas{display:flex;gap:28px;margin-top:34px;position:relative}
-.pizarra-domingo .horas strong{font-family:var(--font-display);font-size:2rem;color:var(--papel);display:block;font-weight:700}
-.pizarra-domingo .horas span{font-size:.82rem;color:rgba(251,248,241,.65)}
+.js .reveal .pizarra-domingo .gis-sub{clip-path:inset(-10% 100% -10% 0);transition:clip-path 1.2s cubic-bezier(.6,.1,.3,1) 1.1s}
+.js .reveal.in .pizarra-domingo .gis-sub{clip-path:inset(-10% -5% -10% 0)}
+.gis-sub .chispa{display:inline-block;animation:chispa 2.4s ease-in-out infinite}
+@keyframes chispa{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.25) rotate(45deg)}}
+.pizarra-domingo .horas{display:flex;gap:28px;margin-top:34px;position:relative;flex-wrap:wrap}
+.pizarra-domingo .horas strong{font-family:var(--font-display);font-size:2rem;color:var(--papel);display:block;font-weight:700;font-variant-numeric:tabular-nums}
+.pizarra-domingo .horas div > span{font-size:.82rem;color:rgba(251,248,241,.65)}
+.pizarra-domingo .gis{ /* gis sobre el marco */
+  position:absolute;bottom:14px;right:28px;width:46px;height:10px;border-radius:3px;
+  background:linear-gradient(180deg,#FFFDF7,#E9E3D3);box-shadow:0 3px 6px rgba(0,0,0,.35);transform:rotate(-6deg);
+}
+.pizarra-domingo .gis::after{content:"";position:absolute;right:-16px;top:1px;width:30px;height:8px;border-radius:3px;background:linear-gradient(180deg,#F6C774,#E0A04A);transform:rotate(14deg);box-shadow:0 3px 6px rgba(0,0,0,.3)}
 
 /* ---------- Materiales (tabs) ---------- */
-.tabs-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px}
+.tabs-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:30px;position:relative}
 .tab-btn{
   padding:11px 22px;border-radius:100px;font-weight:600;font-size:.93rem;color:var(--tinta-suave);
-  border:1.5px solid var(--salvia);background:var(--blanco);transition:all .25s ease;
+  border:1.5px solid var(--salvia);background:var(--blanco);transition:color .3s ease,border-color .3s ease,background-color .3s ease;
+  white-space:nowrap;
 }
+.tab-btn span{position:relative;z-index:2}
 .tab-btn:hover{border-color:var(--cempasuchil);color:var(--pizarron-3)}
 .tab-btn.active{background:var(--pizarron);color:var(--papel);border-color:var(--pizarron)}
-.tab-panel{display:none;animation:fadeUp .45s cubic-bezier(.22,1,.36,1)}
+.js .tab-btn.active{background:transparent}
+.tab-pill{
+  position:absolute;left:0;top:0;z-index:1;border-radius:100px;background:var(--pizarron);pointer-events:none;overflow:hidden;
+  box-shadow:0 8px 20px rgba(20,52,43,.22);
+  transition:transform .55s var(--ease-spring),width .45s var(--ease-out),height .3s ease;
+}
+.no-js .tab-pill{display:none}
+.tab-pill::after{ /* progreso del recorrido automático */
+  content:"";position:absolute;left:18px;right:18px;bottom:5px;height:2px;border-radius:2px;
+  background:var(--cempasuchil);transform-origin:0 50%;transform:scaleX(0);opacity:0;
+}
+.tab-pill.corre::after{opacity:1;animation:tabProg 6.5s linear forwards}
+.tab-pill.corre.pausa::after{animation-play-state:paused}
+@keyframes tabProg{to{transform:scaleX(1)}}
+.tab-panel{display:none}
 .tab-panel.active{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,4vw,56px);align-items:center}
+.tab-panel.active .tab-txt{animation:fadeUp .55s var(--ease-out)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .tab-txt h3{font-size:1.5rem;color:var(--pizarron-3);margin-bottom:12px}
 .tab-txt p{color:var(--tinta-suave);margin-bottom:18px}
 .tab-txt ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 .tab-txt li{display:flex;gap:10px;font-size:.95rem;align-items:flex-start}
 .tab-txt li svg{width:19px;height:19px;flex:none;margin-top:2px;stroke:var(--cempasuchil-2);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.tab-panel.active .tab-txt li{animation:fadeUp .5s var(--ease-out) both}
+.tab-panel.active .tab-txt li:nth-child(2){animation-delay:.08s}
+.tab-panel.active .tab-txt li:nth-child(3){animation-delay:.16s}
+.tab-panel.active .tab-txt li:nth-child(4){animation-delay:.24s}
+.tab-mock-stage{perspective:1400px;padding:10px 18px 18px 0}
 .tab-mock{
   background:var(--blanco);border:1px solid var(--salvia);border-radius:var(--radius-lg);
-  box-shadow:var(--shadow-md);padding:22px;min-height:300px;
+  box-shadow:0 26px 60px rgba(20,52,43,.16);padding:22px;min-height:300px;position:relative;
+  transform-style:preserve-3d;transform:rotateX(5deg) rotateY(-9deg);
 }
+.tab-mock::before{ /* hoja de respaldo detrás del documento */
+  content:"";position:absolute;inset:0;border-radius:inherit;background:var(--papel);border:1px solid var(--salvia);
+  transform:translate3d(16px,14px,-40px);box-shadow:var(--shadow-sm);pointer-events:none;
+}
+.tab-panel.active .tab-mock{animation:mockIn .8s var(--ease-out)}
+@keyframes mockIn{from{opacity:0;transform:rotateX(14deg) rotateY(-34deg) translate3d(30px,0,-90px)}to{opacity:1;transform:rotateX(5deg) rotateY(-9deg)}}
+.tab-panel.active .tab-mock > *{animation:subeMock .6s var(--ease-out) both}
+.tab-panel.active .tab-mock > :nth-child(2){animation-delay:.1s}
+.tab-panel.active .tab-mock > :nth-child(3){animation-delay:.16s}
+.tab-panel.active .tab-mock > :nth-child(4){animation-delay:.22s}
+.tab-panel.active .tab-mock > :nth-child(5){animation-delay:.28s}
+.tab-panel.active .tab-mock > :nth-child(6){animation-delay:.34s}
+.tab-panel.active .tab-mock > :nth-child(7){animation-delay:.4s}
+.tab-panel.active .tab-mock > :nth-child(8){animation-delay:.46s}
+@keyframes subeMock{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
 .mock-bar{display:flex;gap:6px;margin-bottom:16px}
 .mock-bar i{width:10px;height:10px;border-radius:50%;background:var(--salvia)}
 .mock-bar i:first-child{background:var(--rosa)}
@@ -340,30 +576,55 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
 .mock-eval .fila i{width:20px;height:20px;border-radius:6px;border:2px solid var(--pizarron-2);flex:none;display:flex;align-items:center;justify-content:center}
 .mock-eval .fila i svg{width:12px;height:12px;stroke:var(--pizarron-2);stroke-width:3.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .mock-eval .fila span{height:9px;border-radius:5px;background:rgba(20,52,43,.14);flex:1}
+.tab-panel.active .mock-eval .fila i svg{stroke-dasharray:30;stroke-dashoffset:30;animation:palomita .5s ease forwards}
+.tab-panel.active .mock-eval .fila:nth-child(1) i svg{animation-delay:.5s}
+.tab-panel.active .mock-eval .fila:nth-child(2) i svg{animation-delay:.75s}
+.tab-panel.active .mock-eval .fila:nth-child(3) i svg{animation-delay:1s}
+@keyframes palomita{to{stroke-dashoffset:0}}
+/* Memorama jugable */
+.memo-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+.memo-head strong{font-family:var(--font-display);color:var(--pizarron-3);font-size:1.02rem}
+.memo-estado{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--cempasuchil-tx)}
+.memo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.memo-carta{aspect-ratio:1;perspective:600px;border-radius:12px;padding:0}
+.memo-carta .in{position:relative;display:block;width:100%;height:100%;transform-style:preserve-3d;transition:transform .55s var(--ease-out)}
+.memo-carta.volteada .in,.memo-carta.par .in{transform:rotateY(180deg)}
+.memo-carta .cara{
+  position:absolute;inset:0;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  -webkit-backface-visibility:hidden;backface-visibility:hidden;
+  font-family:var(--font-display);font-weight:700;font-size:1.3rem;
+}
+.memo-carta .frente{background:var(--papel-2);color:var(--pizarron-2);transition:background .2s ease}
+.memo-carta:hover .frente{background:#FBEFD8}
+.memo-carta .dorso{background:#FBEFD8;transform:rotateY(180deg);font-size:1.55rem}
+.memo-carta.par .dorso{background:#D6EBDA;box-shadow:inset 0 0 0 2px rgba(29,74,60,.25)}
+.memo-carta.par .in{animation:festeja .5s var(--ease-spring)}
+@keyframes festeja{50%{transform:rotateY(180deg) scale(1.1)}}
 
 /* ---------- Confianza ---------- */
 .conf-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:22px}
 .conf-item{
   background:var(--blanco);border:1px solid var(--salvia);border-radius:var(--radius-lg);
-  padding:32px;display:flex;gap:20px;transition:transform .3s ease,box-shadow .3s ease;
+  padding:32px;display:flex;gap:20px;transition:box-shadow .3s ease;
 }
-.conf-item:hover{transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.conf-item .cico{width:52px;height:52px;border-radius:16px;background:var(--pizarron);flex:none;display:flex;align-items:center;justify-content:center}
+.conf-item:hover{box-shadow:0 22px 48px rgba(20,52,43,.13)}
+.conf-item .cico{width:52px;height:52px;border-radius:16px;background:var(--pizarron);flex:none;display:flex;align-items:center;justify-content:center;transition:transform .45s var(--ease-spring)}
+.conf-item:hover .cico{transform:rotate(-6deg) scale(1.08)}
 .conf-item .cico svg{width:25px;height:25px;stroke:var(--cempasuchil);stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
 .conf-item h3{font-size:1.13rem;color:var(--pizarron-3);margin-bottom:7px}
 .conf-item p{font-size:.93rem;color:var(--tinta-suave)}
 
 /* ---------- Testimonios ---------- */
-.testi-sec{background:var(--papel-2)}
 .testis{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
 .testi{
   background:var(--blanco);border-radius:var(--radius-lg);padding:32px 28px;
   box-shadow:var(--shadow-sm);position:relative;display:flex;flex-direction:column;gap:18px;
-  transition:transform .3s ease,box-shadow .3s ease;
+  transition:box-shadow .3s ease;
 }
-.testi:hover{transform:translateY(-5px);box-shadow:var(--shadow-md)}
+.testi:hover{box-shadow:0 22px 48px rgba(20,52,43,.13)}
 .testi .comilla{font-family:var(--font-display);font-size:3.4rem;line-height:.6;color:var(--cempasuchil);font-weight:700}
-.testi p{font-size:.97rem;color:var(--tinta);flex:1}
+.testi blockquote{flex:1}
+.testi p{font-size:.97rem;color:var(--tinta)}
 .testi .quien{display:flex;align-items:center;gap:13px}
 .testi .avatar{
   width:46px;height:46px;border-radius:50%;flex:none;
@@ -371,115 +632,195 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   display:flex;align-items:center;justify-content:center;font-size:1rem;
 }
 .testi .quien strong{display:block;font-size:.93rem;color:var(--pizarron-3)}
-.testi .quien span{font-size:.8rem;color:var(--tinta-suave)}
+.testi .quien div > span{font-size:.8rem;color:var(--tinta-suave)}
 .estrellas{display:flex;gap:3px}
 .estrellas svg{width:16px;height:16px;fill:var(--cempasuchil)}
 
 /* ---------- FAQ ---------- */
 .faq-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(32px,5vw,70px);align-items:start}
+.faq-lado{position:sticky;top:calc(var(--nav-h) + 28px)}
 .faq-lado .buho-faq{width:150px;margin-top:28px}
 .faq{border-bottom:1px solid var(--salvia)}
 .faq summary{
   list-style:none;display:flex;justify-content:space-between;align-items:center;gap:16px;
   padding:22px 4px;cursor:pointer;font-family:var(--font-display);font-weight:600;
-  font-size:1.06rem;color:var(--pizarron-3);
+  font-size:1.06rem;color:var(--pizarron-3);transition:color .2s ease;
 }
+.faq summary:hover{color:var(--pizarron-2)}
 .faq summary::-webkit-details-marker{display:none}
 .faq summary .mas{
   width:30px;height:30px;border-radius:50%;background:var(--papel-2);flex:none;
-  display:flex;align-items:center;justify-content:center;transition:transform .3s ease,background .3s ease;
+  display:flex;align-items:center;justify-content:center;transition:transform .35s var(--ease-spring),background .3s ease;
 }
+.faq summary:hover .mas{background:#FBEFD8}
 .faq summary .mas svg{width:14px;height:14px;stroke:var(--pizarron-2);stroke-width:2.6;fill:none;stroke-linecap:round}
 .faq[open] summary .mas{transform:rotate(45deg);background:var(--cempasuchil)}
-.faq .resp{padding:0 4px 24px;color:var(--tinta-suave);font-size:.96rem;max-width:60ch}
+.faq.cerrando summary .mas{transform:none;background:var(--papel-2)}
+.faq .resp{overflow:hidden}
+.faq .resp p{padding:0 4px 24px;color:var(--tinta-suave);font-size:.96rem;max-width:60ch}
 
 /* ---------- CTA final ---------- */
 .cta-final{
   background:linear-gradient(150deg,var(--pizarron) 0%,var(--pizarron-3) 100%);
   border-radius:var(--radius-lg);padding:clamp(48px,7vw,84px) clamp(26px,5vw,72px);
-  color:var(--papel);text-align:center;position:relative;overflow:hidden;
+  color:var(--papel);text-align:center;position:relative;overflow:hidden;isolation:isolate;
   box-shadow:var(--shadow-lg);
 }
-.cta-final::before{content:"";position:absolute;inset:0;
+.cta-final::before{content:"";position:absolute;inset:0;z-index:-2;pointer-events:none;
   background-image:radial-gradient(rgba(251,248,241,.06) 1px,transparent 1px);background-size:24px 24px}
-.cta-final::after{content:"";position:absolute;width:520px;height:520px;border-radius:50%;
-  background:radial-gradient(circle,rgba(240,166,58,.2),transparent 65%);bottom:-260px;left:50%;transform:translateX(-50%)}
-.cta-final .buho-cta{width:96px;margin:0 auto 22px;position:relative;z-index:1;animation:flotar 5s ease-in-out infinite}
-.cta-final h2{color:var(--papel);font-size:clamp(1.9rem,4vw,3rem);position:relative;z-index:1}
+.cta-halo{position:absolute;left:50%;top:100%;width:560px;height:560px;margin:-280px 0 0 -280px;border-radius:50%;z-index:-1;pointer-events:none;
+  background:radial-gradient(circle,rgba(240,166,58,.22),transparent 65%);will-change:transform}
+.petalos{position:absolute;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+.petalos i{
+  position:absolute;top:-24px;left:var(--x);width:var(--s);height:var(--s);border-radius:70% 0 70% 0;
+  background:var(--c,var(--cempasuchil));opacity:0;animation:petalo var(--t) linear var(--d) infinite;
+}
+@keyframes petalo{
+  0%{transform:translate3d(0,0,0) rotate(0deg);opacity:0}
+  12%{opacity:.6}
+  85%{opacity:.45}
+  100%{transform:translate3d(var(--dx),620px,0) rotate(560deg);opacity:0}
+}
+.cta-final .buho-cta{width:96px;margin:0 auto 22px;position:relative;animation:flotar 5s ease-in-out infinite}
+.cta-final h2{color:var(--papel);font-size:clamp(1.9rem,4vw,3rem);position:relative;margin-top:0}
 .cta-final h2 em{font-style:normal;color:var(--cempasuchil)}
-.cta-final p{margin:16px auto 34px;color:rgba(251,248,241,.78);max-width:480px;position:relative;z-index:1}
-.cta-final .btn{position:relative;z-index:1;font-size:1.08rem;padding:18px 36px}
-.cta-final .nota{margin-top:18px;font-size:.83rem;color:rgba(251,248,241,.55);position:relative;z-index:1}
+.cta-final p{margin:16px auto 34px;color:rgba(251,248,241,.78);max-width:480px;position:relative}
+.cta-final .btn{font-size:1.08rem;padding:18px 36px}
+.cta-final .nota{margin-top:18px;font-size:.83rem;color:rgba(251,248,241,.55);position:relative}
 
 /* ---------- Footer ---------- */
-.footer{background:var(--pizarron-3);color:rgba(251,248,241,.7);padding:56px 0 32px;margin-top:clamp(72px,9vw,120px)}
+.footer{background:var(--pizarron-3);color:rgba(251,248,241,.7);padding:56px 0 calc(32px + env(safe-area-inset-bottom))}
 .footer-grid{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:40px;margin-bottom:44px}
 .footer .logo-word{color:var(--papel)}
 .footer p{font-size:.9rem;max-width:34ch;margin-top:14px}
-.footer h5{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cempasuchil);margin-bottom:16px;font-weight:500}
+.footer h2.h5{font-family:var(--font-mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--cempasuchil);margin:0 0 16px;font-weight:500;line-height:1.4}
 .footer ul{list-style:none;display:flex;flex-direction:column;gap:10px}
 .footer ul a{font-size:.92rem;transition:color .2s ease}
 .footer ul a:hover{color:var(--cempasuchil)}
-.footer-base{border-top:1px solid rgba(251,248,241,.1);padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.82rem;color:rgba(251,248,241,.45)}
+.footer-base{border-top:1px solid rgba(251,248,241,.1);padding-top:26px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;font-size:.82rem;color:rgba(251,248,241,.5)}
+.footer-base a:hover{color:var(--cempasuchil)}
+.bandera{display:inline-block;width:18px;height:auto;margin-left:4px;vertical-align:-1px;border-radius:2px}
 
 /* ---------- WhatsApp flotante ---------- */
 .wa-float{
-  position:fixed;bottom:24px;right:24px;z-index:80;
-  width:62px;height:62px;border-radius:50%;background:var(--wa);
+  position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));right:24px;z-index:80;
+  width:62px;height:62px;border-radius:50%;background:var(--wa);color:#fff;
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 10px 30px rgba(18,140,74,.45);
-  transition:transform .25s cubic-bezier(.34,1.56,.64,1);
+  transition:transform .3s var(--ease-spring);
 }
 .wa-float:hover{transform:scale(1.1) rotate(6deg)}
-.wa-float svg{width:32px;height:32px}
+.wa-float svg{width:32px;height:32px;fill:currentColor}
 .wa-float::before{
   content:"";position:absolute;inset:0;border-radius:50%;background:var(--wa);
   animation:pulso 2.4s ease-out infinite;z-index:-1;
 }
 @keyframes pulso{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.65);opacity:0}}
 .wa-tip{
-  position:fixed;bottom:38px;right:98px;z-index:80;background:var(--blanco);
+  position:fixed;bottom:calc(38px + env(safe-area-inset-bottom));right:98px;z-index:80;background:var(--blanco);
   padding:10px 16px;border-radius:14px 14px 4px 14px;box-shadow:var(--shadow-md);
   font-size:.86rem;font-weight:600;color:var(--tinta);
-  opacity:0;transform:translateY(8px);pointer-events:none;
-  transition:opacity .4s ease,transform .4s ease;
+  opacity:0;transform:translateY(8px) scale(.96);transform-origin:100% 100%;pointer-events:none;
+  transition:opacity .4s ease,transform .4s var(--ease-spring);
 }
 .wa-tip.show{opacity:1;transform:none}
 
 /* ---------- Responsive ---------- */
+@media(max-width:1080px){
+  .chip-b{left:-14px}
+  .chip-a{right:-8px}
+}
 @media(max-width:980px){
   .cards,.testis{grid-template-columns:1fr 1fr}
   .pasos{grid-template-columns:1fr}
-  .paso .flecha{display:none}
-  .hero-grid{grid-template-columns:1fr;gap:56px}
-  .plan-card{transform:none;max-width:520px;margin:0 auto}
+  .hero-grid{grid-template-columns:1fr;gap:74px}
+  .plan-stage{max-width:520px;width:100%;margin:0 auto}
+  .plan-3d{transform:rotateX(2deg) rotateY(-3deg)}
   .benef-grid,.faq-grid,.tab-panel.active{grid-template-columns:1fr}
+  .faq-lado{position:static}
   .faq-lado .buho-faq{display:none}
   .footer-grid{grid-template-columns:1fr 1fr}
+  .scroll-hint{display:none}
+  /* ruta vertical en pantallas angostas */
+  .pasos-wrap{padding-left:48px}
+  .ruta{position:absolute;left:0;top:0;bottom:0;width:48px;height:auto;margin:0}
+  .ruta-riel{top:var(--a,40px);height:calc(var(--b,90%) - var(--a,40px));left:50%;width:2px;margin:0 0 0 -1px;
+    background-image:linear-gradient(180deg,rgba(251,248,241,.3) 50%,transparent 0);background-size:2px 14px}
+  .ruta-fill{transform-origin:50% 0}
+  .ruta-activa .ruta-fill{transform:scaleY(0)}
+  .ruta-nodo{left:50%;top:var(--pos,50%)}
+  .avion{left:50%;top:0;width:40px;height:40px;margin:-20px 0 0 -20px}
+  .avion .gira{transform:rotate(90deg)}
+  .tab-mock-stage{padding:6px 12px 14px 0}
 }
 @media(max-width:680px){
+  :root{--nav-h:66px}
   .nav-links{display:none}
   .menu-btn{display:flex}
   .cards,.testis,.conf-grid{grid-template-columns:1fr}
   .hero h1 .subrayado{white-space:normal}
-  .buho-flotante{width:84px;top:-42px;right:0}
-  .chip-b{right:-8px}
-  .chip-a{left:-8px}
+  .z-buho{width:84px;top:-46px;right:-6px}
+  .plan-top{padding-right:66px}
+  .plan-card{padding:22px 18px 18px}
+  .plan-row{grid-template-columns:40px 1fr 24px;gap:10px;padding:10px 12px}
+  .plan-row .linea{font-size:.82rem}
+  .chip-flotante{font-size:.76rem;padding:8px 12px}
+  .chip-b{left:-8px;top:-26px}
+  .chip-a{right:-6px;bottom:-26px}
   .hero-ctas .btn{width:100%;justify-content:center}
   .footer-grid{grid-template-columns:1fr}
   .wa-tip{display:none}
+  .wa-float{right:18px;bottom:calc(18px + env(safe-area-inset-bottom))}
   .hero-proof{gap:18px}
+  .tabs-bar{flex-wrap:nowrap;overflow-x:auto;margin:0 -24px 26px;padding:4px 24px;scrollbar-width:none;scroll-snap-type:x proximity}
+  .tabs-bar::-webkit-scrollbar{display:none}
+  .tab-btn{scroll-snap-align:center}
+  .conf-item{padding:26px 22px;gap:16px}
+  .pizarra-domingo .horas{gap:20px}
 }
 @media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;scroll-behavior:auto !important}
-  .rise,.reveal,.plan-row{opacity:1 !important;transform:none !important}
-  .plan-row .check{transform:scale(1)}
+  *,*::before,*::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important;transition-delay:0s !important;scroll-behavior:auto !important}
+  .rise,.reveal,.plan-row,.hero h1 .w > span{opacity:1 !important;transform:none !important;translate:none !important;rotate:none !important}
+  .plan-row .check{transform:scale(1) !important}
+  .hero h1 .subrayado path{stroke-dashoffset:0}
 }
 </style>
+
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"Organization",
+      "name":"EDUVO",
+      "url":"https://asternodelab.github.io/eduvo-landing/",
+      "logo":"https://asternodelab.github.io/eduvo-landing/apple-touch-icon.png",
+      "email":"eduvo.mx@proton.me",
+      "description":"Planeaciones didácticas, materiales y evaluaciones para docentes de primaria en México, alineadas a la Nueva Escuela Mexicana.",
+      "areaServed":"MX",
+      "contactPoint":{"@type":"ContactPoint","telephone":"+52-56-5617-8601","contactType":"customer service","availableLanguage":"es"}
+    },
+    {
+      "@type":"FAQPage",
+      "mainEntity":[
+        {"@type":"Question","name":"¿Las planeaciones están alineadas a la Nueva Escuela Mexicana?","acceptedAnswer":{"@type":"Answer","text":"Sí, completamente. Trabajamos con el programa vigente, los campos formativos, las metodologías activas y los procesos de desarrollo de aprendizaje oficiales. El formato es institucional y está pensado para entregarse a dirección tal como llega."}},
+        {"@type":"Question","name":"¿Para qué grados funciona?","acceptedAnswer":{"@type":"Answer","text":"Para todos los grados de primaria, de 1º a 6º. Cada planeación se prepara específicamente para tu grado y las características de tu grupo."}},
+        {"@type":"Question","name":"¿Cómo recibo mi planeación cada semana?","acceptedAnswer":{"@type":"Answer","text":"Directo en tu WhatsApp, puntual cada semana. Recibes tu planeación completa lista para imprimir, junto con los materiales, las tareas, el juego interactivo y los instrumentos de evaluación."}},
+        {"@type":"Question","name":"¿Puedo pedir ajustes o cambios?","acceptedAnswer":{"@type":"Answer","text":"Claro. Si algo no encaja con tu grupo, tu escuela o tu semana, nos escribes por el mismo chat y lo ajustamos rápido."}},
+        {"@type":"Question","name":"¿Sirve para mi comunidad, aunque sea rural o con pocos recursos?","acceptedAnswer":{"@type":"Answer","text":"Precisamente para eso está pensado. Antes de preparar tu primera semana te preguntamos por tu contexto, y las actividades y tareas se calibran a lo que tus alumnos y sus familias realmente tienen a la mano."}},
+        {"@type":"Question","name":"¿Cuánto cuesta?","acceptedAnswer":{"@type":"Answer","text":"Tenemos planes accesibles pensados para el bolsillo docente, según lo que necesites cada semana. Escríbenos por WhatsApp y te compartimos las opciones sin ningún compromiso."}},
+        {"@type":"Question","name":"¿Tengo que instalar algo o aprender una plataforma?","acceptedAnswer":{"@type":"Answer","text":"No. Todo funciona por WhatsApp, la app que ya usas todos los días. Sin registros complicados, sin contraseñas nuevas, sin curva de aprendizaje."}}
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
+<a class="skip" href="#contenido">Saltar al contenido</a>
+<div class="progreso" id="progreso" aria-hidden="true"></div>
 
-<!-- ==================== SVG: marca EDUVO (búho) ==================== -->
+<!-- ==================== SVG: marca EDUVO e íconos ==================== -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <!-- Búho geométrico EDUVO -->
@@ -515,14 +856,19 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
       <path d="M26 26 L34 16 L38 28 Z" fill="#FBF8F1" opacity=".9"/>
       <path d="M74 26 L66 16 L62 28 Z" fill="#FBF8F1" opacity=".9"/>
     </g>
+    <symbol id="i-wa" viewBox="0 0 24 24"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M4 12l5 5L20 6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></symbol>
+    <symbol id="i-mas" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   </defs>
 </svg>
 
 <!-- ==================== NAV ==================== -->
-<nav class="nav on-dark" id="nav">
+<header>
+<nav class="nav on-dark" id="nav" aria-label="Principal">
   <div class="wrap nav-inner">
-    <a href="#" class="logo" aria-label="EDUVO inicio">
-      <svg class="logo-mark" viewBox="0 0 100 100"><use href="#marca"/></svg>
+    <a href="#inicio" class="logo" aria-label="EDUVO inicio">
+      <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#marca"/></svg>
       <span class="logo-word">EDU<em>VO</em></span>
     </a>
     <div class="nav-links">
@@ -530,57 +876,66 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
       <a href="#como-funciona">Cómo funciona</a>
       <a href="#materiales">Materiales</a>
       <a href="#faq">Preguntas</a>
-      <a href="#" class="btn btn-wa" data-wa data-msg="¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊">
-        <svg class="wa-ico" viewBox="0 0 24 24" fill="#06301A"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+      <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-wa" data-wa>
+        <svg class="wa-ico" aria-hidden="true"><use href="#i-wa"/></svg>
         Hablar por WhatsApp
       </a>
     </div>
-    <button class="menu-btn" id="menuBtn" aria-label="Abrir menú">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    <button class="menu-btn" id="menuBtn" aria-label="Abrir menú" aria-expanded="false" aria-controls="mobileMenu">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
     </button>
   </div>
 </nav>
+</header>
 
 <!-- Menú móvil -->
-<div class="mobile-menu" id="mobileMenu">
+<div class="mobile-menu" id="mobileMenu" role="dialog" aria-modal="true" aria-label="Menú">
   <div class="close-row">
     <span class="logo-word" style="color:var(--papel)">EDU<em>VO</em></span>
-    <button class="menu-btn" id="closeBtn" aria-label="Cerrar menú" style="display:flex">
-      <svg viewBox="0 0 24 24" fill="none" stroke="#FBF8F1" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    <button class="menu-btn" id="closeBtn" aria-label="Cerrar menú">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
     </button>
   </div>
-  <a href="#servicios">Qué recibes</a>
-  <a href="#como-funciona">Cómo funciona</a>
-  <a href="#materiales">Materiales</a>
-  <a href="#confianza">Por qué confiar</a>
-  <a href="#faq">Preguntas frecuentes</a>
-  <a href="#" class="btn btn-wa" data-wa data-msg="¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊">
-    <svg class="wa-ico" viewBox="0 0 24 24" fill="#06301A"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+  <a href="#servicios" style="--i:0">Qué recibes</a>
+  <a href="#como-funciona" style="--i:1">Cómo funciona</a>
+  <a href="#materiales" style="--i:2">Materiales</a>
+  <a href="#confianza" style="--i:3">Por qué confiar</a>
+  <a href="#faq" style="--i:4">Preguntas frecuentes</a>
+  <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-wa" data-wa>
+    <svg class="wa-ico" aria-hidden="true"><use href="#i-wa"/></svg>
     Hablar por WhatsApp
   </a>
 </div>
 
+<main id="contenido">
 <!-- ==================== HERO ==================== -->
-<header class="hero">
+<section class="hero" id="inicio">
+  <div class="hero-trama" aria-hidden="true"></div>
+  <div class="hero-halo" aria-hidden="true"></div>
+  <canvas class="hero-polvo" id="polvo" aria-hidden="true"></canvas>
   <div class="wrap hero-grid">
-    <div>
-      <span class="eyebrow rise d1" style="color:var(--cempasuchil)">Planeaciones para primaria · Nueva Escuela Mexicana</span>
-      <h1 class="rise d2" style="margin-top:18px">
-        Tu planeación de la semana,
-        <span class="subrayado">lista antes del lunes<svg viewBox="0 0 300 20" preserveAspectRatio="none"><path d="M4 14 Q 80 4 150 11 T 296 9"/></svg></span>
+    <div class="hero-copy" id="heroCopy">
+      <span class="eyebrow claro rise d1">Planeaciones para primaria · Nueva Escuela Mexicana</span>
+      <h1>
+        <span class="w" style="--i:0"><span>Tu</span></span>
+        <span class="w" style="--i:1"><span>planeación</span></span>
+        <span class="w" style="--i:2"><span>de</span></span>
+        <span class="w" style="--i:3"><span>la</span></span>
+        <span class="w" style="--i:4"><span>semana,</span></span>
+        <span class="w" style="--i:6"><span class="subrayado">lista antes del lunes<svg viewBox="0 0 300 20" preserveAspectRatio="none" aria-hidden="true"><path d="M4 14 Q 80 4 150 11 T 296 9"/></svg></span></span>
       </h1>
       <p class="hero-sub rise d3">
         Planeaciones completas, actividades diarias, materiales listos para imprimir y evaluaciones —
         hechas para tu grupo, tu grado y tu comunidad. Tú enseñas; del papeleo nos encargamos nosotros.
       </p>
       <div class="hero-ctas rise d4">
-        <a href="#" class="btn btn-wa" data-wa data-msg="Hola EDUVO 👋 Soy docente de primaria y quiero mi planeación semanal. ¿Me pueden dar información?">
-          <svg class="wa-ico" viewBox="0 0 24 24" fill="#06301A"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+        <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-wa" data-wa data-magnet data-msg="Hola EDUVO 👋 Soy docente de primaria y quiero mi planeación semanal. ¿Me pueden dar información?">
+          <svg class="wa-ico" aria-hidden="true"><use href="#i-wa"/></svg>
           Quiero mi planeación
         </a>
         <a href="#materiales" class="btn btn-ghost">Ver qué incluye</a>
       </div>
-      <div class="hero-proof rise d4">
+      <div class="hero-proof rise d5">
         <div><strong>1º a 6º</strong><span>Todos los grados</span></div>
         <div><strong>100% NEM</strong><span>Formato oficial</span></div>
         <div><strong>Cada semana</strong><span>Entrega puntual</span></div>
@@ -588,63 +943,67 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
     </div>
 
     <!-- Elemento firma: la planeación que se escribe sola -->
-    <div class="plan-stage rise d3">
-      <svg class="buho-flotante" viewBox="0 0 120 120" aria-hidden="true"><use href="#buho"/></svg>
-      <div class="plan-card" id="planCard">
-        <div class="plan-top">
-          <span class="tag">Planeación semanal</span>
-          <span class="grado">3º de primaria</span>
+    <div class="plan-stage rise d3" id="planStage">
+      <div class="plan-3d" id="plan3d">
+        <div class="hoja hoja-2" aria-hidden="true"></div>
+        <div class="hoja hoja-1" aria-hidden="true"></div>
+        <div class="plan-card" id="planCard">
+          <span class="brillo" id="brillo" aria-hidden="true"></span>
+          <div class="plan-top">
+            <span class="tag">Planeación semanal</span>
+            <span class="grado" id="planGrado">3º de primaria</span>
+          </div>
+          <div class="plan-title" id="planTitle">Proyecto: Los ecosistemas de mi comunidad</div>
+          <div class="plan-rows" id="planRows">
+            <div class="plan-row">
+              <span class="dia">Lun</span>
+              <span class="linea"><b>Inicio.</b> Exploración: ¿qué seres vivos hay cerca?</span>
+              <span class="check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            </div>
+            <div class="plan-row">
+              <span class="dia">Mar</span>
+              <span class="linea"><b>Desarrollo.</b> Recorrido y registro de observaciones</span>
+              <span class="check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            </div>
+            <div class="plan-row">
+              <span class="dia">Mié</span>
+              <span class="linea"><b>Desarrollo.</b> Cadenas alimentarias con material impreso</span>
+              <span class="check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            </div>
+            <div class="plan-row">
+              <span class="dia">Jue</span>
+              <span class="linea"><b>Juego.</b> Memorama interactivo de ecosistemas</span>
+              <span class="check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            </div>
+            <div class="plan-row">
+              <span class="dia">Vie</span>
+              <span class="linea"><b>Cierre.</b> Presentación y evaluación con rúbrica</span>
+              <span class="check"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            </div>
+          </div>
+          <div class="plan-foot">
+            <span class="sello"><svg aria-hidden="true"><use href="#i-check"/></svg></span>
+            Alineada a la NEM · Con materiales, tareas y evaluación incluidos
+          </div>
         </div>
-        <div class="plan-title" id="planTitle">Proyecto: Los ecosistemas de mi comunidad</div>
-        <div class="plan-rows" id="planRows">
-          <div class="plan-row" data-delay="0">
-            <span class="dia">Lun</span>
-            <span class="linea"><b>Inicio.</b> Exploración: ¿qué seres vivos hay cerca?</span>
-            <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
-          </div>
-          <div class="plan-row" data-delay="420">
-            <span class="dia">Mar</span>
-            <span class="linea"><b>Desarrollo.</b> Recorrido y registro de observaciones</span>
-            <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
-          </div>
-          <div class="plan-row" data-delay="840">
-            <span class="dia">Mié</span>
-            <span class="linea"><b>Desarrollo.</b> Cadenas alimentarias con material impreso</span>
-            <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
-          </div>
-          <div class="plan-row" data-delay="1260">
-            <span class="dia">Jue</span>
-            <span class="linea"><b>Juego.</b> Memorama interactivo de ecosistemas</span>
-            <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
-          </div>
-          <div class="plan-row" data-delay="1680">
-            <span class="dia">Vie</span>
-            <span class="linea"><b>Cierre.</b> Presentación y evaluación con rúbrica</span>
-            <span class="check"><svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg></span>
-          </div>
+        <div class="z-buho" aria-hidden="true">
+          <svg class="buho buho-flotante" viewBox="0 0 120 120" data-vivo><use href="#buho"/></svg>
         </div>
-        <div class="plan-foot">
-          <span class="sello">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#14342B" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
-          </span>
-          Alineada a la NEM · Con materiales, tareas y evaluación incluidos
-        </div>
+        <div class="z-chip chip-a"><div class="chip-flotante"><span class="dot"></span> Entregada por WhatsApp</div></div>
+        <div class="z-chip chip-b"><div class="chip-flotante"><span class="dot"></span> Lista para imprimir</div></div>
       </div>
-      <div class="chip-flotante chip-a"><span class="dot"></span> Entregada por WhatsApp</div>
-      <div class="chip-flotante chip-b"><span class="dot"></span> Lista para imprimir</div>
     </div>
   </div>
-</header>
+  <a class="scroll-hint" href="#servicios" aria-label="Bajar a qué recibes"><span>Desliza</span><i></i></a>
+</section>
 
 <!-- ==================== FRANJA NEM ==================== -->
 <div class="franja" aria-hidden="true">
   <div class="marquee">
-    <div class="marquee-set">
-      <span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span>
-    </div>
-    <div class="marquee-set">
-      <span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span>
-    </div>
+    <div class="marquee-set"><span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span></div>
+    <div class="marquee-set"><span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span></div>
+    <div class="marquee-set"><span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span></div>
+    <div class="marquee-set"><span>Nueva Escuela Mexicana <i>◆</i> Campos formativos <i>◆</i> Programa sintético y analítico <i>◆</i> Metodologías activas <i>◆</i> Evaluación formativa <i>◆</i> 1º a 6º de primaria <i>◆</i></span></div>
   </div>
 </div>
 
@@ -653,43 +1012,43 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Qué recibes</span>
-      <h2 style="margin-top:14px">Todo lo que tu semana necesita, en un solo lugar</h2>
+      <h2>Todo lo que tu semana necesita, en un solo lugar</h2>
       <p>No son plantillas genéricas: cada entrega se prepara para tu grado, tu contexto y tu forma de trabajar.</p>
     </div>
     <div class="cards">
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v5h8V4"/><path d="M8 14h8M8 17h5"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h13l3 3v13H4z"/><path d="M8 4v5h8V4"/><path d="M8 14h8M8 17h5"/></svg></div>
         <h3>Planeación semanal completa</h3>
         <p>Secuencia didáctica día por día con inicio, desarrollo y cierre, alineada al programa vigente y lista para entregar a dirección.</p>
       </div>
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
         <h3>Actividades diarias</h3>
         <p>Actividades y tareas calibradas a la realidad de tu comunidad: aplicables, claras y pensadas para tus alumnos, no para un aula ideal.</p>
       </div>
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-6h4v6"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h16M6 20V9l6-5 6 5v11"/><path d="M10 20v-6h4v6"/></svg></div>
         <h3>Proyectos por campo formativo</h3>
         <p>Proyectos comunitarios, de aula y escolares con las metodologías activas que pide la NEM, desarrollados de principio a fin.</p>
       </div>
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/></svg></div>
         <h3>Materiales listos para imprimir</h3>
         <p>Fichas, imágenes, láminas y recursos visuales diseñados para cada actividad. Los imprimes y a trabajar.</p>
       </div>
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="8.5" cy="12" r="1.6"/><path d="M14 10.5v3M15.5 12h-3"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="3"/><circle cx="8.5" cy="12" r="1.6"/><path d="M14 10.5v3M15.5 12h-3"/></svg></div>
         <h3>Juego interactivo semanal</h3>
         <p>Un juego digital ligado al tema de la semana para repasar en clase o en casa. Aprende jugando, literalmente.</p>
       </div>
-      <div class="card reveal">
+      <div class="card spot reveal" data-tilt>
         <span class="pico"></span>
-        <div class="ico"><svg viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+        <div class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
         <h3>Evaluación e instrumentos</h3>
         <p>Rúbricas, listas de cotejo y evaluaciones formativas coherentes con lo que trabajaste — no evaluaciones sueltas.</p>
       </div>
@@ -701,32 +1060,39 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
 <section class="section pasos-sec" id="como-funciona">
   <div class="wrap">
     <div class="section-head reveal">
-      <span class="eyebrow">Cómo funciona</span>
-      <h2 style="margin-top:14px">Tres pasos y tu semana queda resuelta</h2>
+      <span class="eyebrow claro">Cómo funciona</span>
+      <h2>Tres pasos y tu semana queda resuelta</h2>
       <p>Sin plataformas complicadas ni registros eternos. Todo pasa donde ya estás: tu WhatsApp.</p>
     </div>
-    <div class="pasos">
-      <div class="paso reveal">
-        <div class="num">1 <small>Escríbenos</small></div>
-        <h3>Cuéntanos de tu grupo</h3>
-        <p>Nos dices tu grado, tu escuela y cómo es tu comunidad. Con eso preparamos planeaciones que de verdad funcionan en tu salón.</p>
-        <span class="flecha"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
+    <div class="pasos-wrap" id="pasosWrap">
+      <div class="ruta" aria-hidden="true">
+        <div class="ruta-riel"><div class="ruta-fill"></div></div>
+        <span class="ruta-nodo"></span><span class="ruta-nodo"></span><span class="ruta-nodo"></span>
+        <div class="avion"><div class="gira">
+          <svg viewBox="0 0 48 48"><path d="M3 21 L45 7 L19 27 Z" fill="#FBF8F1"/><path d="M19 27 L45 7 L27 41 Z" fill="#DCE7DD"/><path d="M19 27 L27 41 L22 30 Z" fill="#F0A63A"/></svg>
+        </div></div>
       </div>
-      <div class="paso reveal">
-        <div class="num">2 <small>Recibe</small></div>
-        <h3>Tu semana llega lista</h3>
-        <p>Cada semana recibes tu planeación completa con actividades, materiales, juego y evaluación. Puntual, sin que tengas que perseguir a nadie.</p>
-        <span class="flecha"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
-      </div>
-      <div class="paso reveal">
-        <div class="num">3 <small>Enseña</small></div>
-        <h3>Tú a lo tuyo: enseñar</h3>
-        <p>Imprimes, entregas a dirección y das tu clase con todo resuelto. ¿Necesitas un ajuste? Nos escribes y lo corregimos rápido.</p>
+      <div class="pasos">
+        <div class="paso spot reveal" data-tilt>
+          <div class="num">1 <small>Escríbenos</small></div>
+          <h3>Cuéntanos de tu grupo</h3>
+          <p>Nos dices tu grado, tu escuela y cómo es tu comunidad. Con eso preparamos planeaciones que de verdad funcionan en tu salón.</p>
+        </div>
+        <div class="paso spot reveal" data-tilt>
+          <div class="num">2 <small>Recibe</small></div>
+          <h3>Tu semana llega lista</h3>
+          <p>Cada semana recibes tu planeación completa con actividades, materiales, juego y evaluación. Puntual, sin que tengas que perseguir a nadie.</p>
+        </div>
+        <div class="paso spot reveal" data-tilt>
+          <div class="num">3 <small>Enseña</small></div>
+          <h3>Tú a lo tuyo: enseñar</h3>
+          <p>Imprimes, entregas a dirección y das tu clase con todo resuelto. ¿Necesitas un ajuste? Nos escribes y lo corregimos rápido.</p>
+        </div>
       </div>
     </div>
     <div class="pasos-cta reveal">
-      <a href="#" class="btn btn-wa" data-wa data-msg="Hola EDUVO 👋 Quiero empezar. Les cuento de mi grupo: soy docente de ____ grado.">
-        <svg class="wa-ico" viewBox="0 0 24 24" fill="#06301A"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+      <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-wa" data-wa data-magnet data-msg="Hola EDUVO 👋 Quiero empezar. Les cuento de mi grupo: soy docente de ____ grado.">
+        <svg class="wa-ico" aria-hidden="true"><use href="#i-wa"/></svg>
         Empezar por WhatsApp
       </a>
     </div>
@@ -738,170 +1104,185 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   <div class="wrap benef-grid">
     <div class="reveal">
       <span class="eyebrow">Tu tiempo de vuelta</span>
-      <h2 style="margin-top:14px">Los domingos son para descansar, no para planear</h2>
+      <h2>Los domingos son para descansar, no para planear</h2>
       <div class="benef-lista">
         <div class="benef-item">
-          <div class="bico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
-          <div><h4>Recupera horas cada semana</h4><p>Las tardes y fines de semana que hoy se van en formatos, vuelven a ser tuyos.</p></div>
+          <div class="bico"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          <div><h3 class="h4">Recupera horas cada semana</h3><p>Las tardes y fines de semana que hoy se van en formatos, vuelven a ser tuyos.</p></div>
         </div>
         <div class="benef-item">
-          <div class="bico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
-          <div><h4>Entrega a dirección sin pendientes</h4><p>Formato institucional completo y cuidado: llegas con todo en orden, siempre.</p></div>
+          <div class="bico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div><h3 class="h4">Entrega a dirección sin pendientes</h3><p>Formato institucional completo y cuidado: llegas con todo en orden, siempre.</p></div>
         </div>
         <div class="benef-item">
-          <div class="bico"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></div>
-          <div><h4>Clases con más intención</h4><p>Con la logística resuelta, tu energía se va a lo que importa: tus alumnos.</p></div>
+          <div class="bico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg></div>
+          <div><h3 class="h4">Clases con más intención</h3><p>Con la logística resuelta, tu energía se va a lo que importa: tus alumnos.</p></div>
         </div>
         <div class="benef-item">
-          <div class="bico"><svg viewBox="0 0 24 24"><path d="M8 10h8M8 14h5"/><path d="M21 12a9 9 0 1 1-4-7.5L21 3l-1 4z"/></svg></div>
-          <div><h4>Atención humana y rápida</h4><p>Nos escribes por WhatsApp y te responde una persona que entiende tu realidad docente.</p></div>
+          <div class="bico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h8M8 14h5"/><path d="M21 12a9 9 0 1 1-4-7.5L21 3l-1 4z"/></svg></div>
+          <div><h3 class="h4">Atención humana y rápida</h3><p>Nos escribes por WhatsApp y te responde una persona que entiende tu realidad docente.</p></div>
         </div>
       </div>
     </div>
-    <div class="reveal">
-      <div class="pizarra-domingo">
+    <div class="reveal pizarra-stage">
+      <div class="pizarra-domingo" data-tilt data-tilt-max="5" data-tilt-lift="0">
         <div class="gis-titulo"><span class="tachado">Domingo: hacer la planeación</span></div>
-        <div class="gis-sub">Domingo: descansar ✦</div>
+        <div class="gis-sub">Domingo: descansar <span class="chispa" aria-hidden="true">✦</span></div>
         <div class="horas">
-          <div><strong>6–10 h</strong><span>recuperadas por semana</span></div>
-          <div><strong>5 días</strong><span>planeados al detalle</span></div>
+          <div><strong>6–<span data-count="10">10</span> h</strong><span>recuperadas por semana</span></div>
+          <div><strong><span data-count="5">5</span> días</strong><span>planeados al detalle</span></div>
           <div><strong>1 chat</strong><span>para resolver todo</span></div>
         </div>
+        <span class="gis" aria-hidden="true"></span>
       </div>
     </div>
   </div>
 </section>
 
 <!-- ==================== MATERIALES (TABS) ==================== -->
-<section class="section" id="materiales" style="background:var(--papel-2)">
+<section class="section sec-papel" id="materiales">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Lo que llega a tus manos</span>
-      <h2 style="margin-top:14px">Así se ve una semana con EDUVO</h2>
+      <h2>Así se ve una semana con EDUVO</h2>
       <p>Cada entrega incluye cinco piezas que trabajan juntas. Explóralas:</p>
     </div>
-    <div class="reveal">
+    <div class="reveal" id="tabs">
       <div class="tabs-bar" role="tablist" aria-label="Materiales de la semana">
-        <button class="tab-btn active" role="tab" aria-selected="true" data-tab="t1">📘 Planeación</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="t2">✏️ Tareas</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="t3">🖨️ Materiales</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="t4">🎮 Juego</button>
-        <button class="tab-btn" role="tab" aria-selected="false" data-tab="t5">✅ Evaluación</button>
+        <span class="tab-pill" aria-hidden="true"></span>
+        <button class="tab-btn active" role="tab" id="tab-t1" aria-selected="true" aria-controls="t1" data-tab="t1"><span>📘 Planeación</span></button>
+        <button class="tab-btn" role="tab" id="tab-t2" aria-selected="false" aria-controls="t2" data-tab="t2" tabindex="-1"><span>✏️ Tareas</span></button>
+        <button class="tab-btn" role="tab" id="tab-t3" aria-selected="false" aria-controls="t3" data-tab="t3" tabindex="-1"><span>🖨️ Materiales</span></button>
+        <button class="tab-btn" role="tab" id="tab-t4" aria-selected="false" aria-controls="t4" data-tab="t4" tabindex="-1"><span>🎮 Juego</span></button>
+        <button class="tab-btn" role="tab" id="tab-t5" aria-selected="false" aria-controls="t5" data-tab="t5" tabindex="-1"><span>✅ Evaluación</span></button>
       </div>
 
-      <div class="tab-panel active" id="t1" role="tabpanel">
+      <div class="tab-panel active" id="t1" role="tabpanel" aria-labelledby="tab-t1" tabindex="0">
         <div class="tab-txt">
           <h3>La planeación completa, en formato oficial</h3>
           <p>Documento institucional con todo lo que dirección espera ver y todo lo que tú necesitas para dar la clase.</p>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Secuencia didáctica día por día</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Contenidos y procesos de desarrollo de aprendizaje oficiales</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Adecuaciones para atender la diversidad de tu aula</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Portada, ficha técnica y espacio de reflexión docente</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Secuencia didáctica día por día</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Contenidos y procesos de desarrollo de aprendizaje oficiales</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Adecuaciones para atender la diversidad de tu aula</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Portada, ficha técnica y espacio de reflexión docente</li>
           </ul>
         </div>
-        <div class="tab-mock" aria-hidden="true">
-          <div class="mock-bar"><i></i><i></i><i></i></div>
-          <div class="mock-line titulo"></div>
-          <div class="mock-line w90"></div>
-          <div class="mock-line w80"></div>
-          <div class="mock-line w60"></div>
-          <div class="mock-bloque"><div class="mini"></div><div class="mlines"><div></div><div></div></div></div>
-          <div class="mock-bloque"><div class="mini" style="background:var(--pizarron-2)"></div><div class="mlines"><div></div><div></div></div></div>
-          <div class="mock-line w45"></div>
+        <div class="tab-mock-stage">
+          <div class="tab-mock" aria-hidden="true" data-tilt data-tilt-base="5,-9" data-tilt-max="7" data-tilt-lift="0">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-line titulo"></div>
+            <div class="mock-line w90"></div>
+            <div class="mock-line w80"></div>
+            <div class="mock-line w60"></div>
+            <div class="mock-bloque"><div class="mini"></div><div class="mlines"><div></div><div></div></div></div>
+            <div class="mock-bloque"><div class="mini" style="background:var(--pizarron-2)"></div><div class="mlines"><div></div><div></div></div></div>
+            <div class="mock-line w45"></div>
+          </div>
         </div>
       </div>
 
-      <div class="tab-panel" id="t2" role="tabpanel">
+      <div class="tab-panel" id="t2" role="tabpanel" aria-labelledby="tab-t2" tabindex="0">
         <div class="tab-txt">
           <h3>Tareas que sí se pueden hacer en casa</h3>
           <p>Actividades para la familia calibradas a la realidad de tu comunidad: sin pedir materiales imposibles ni internet que no hay.</p>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Una tarea por día, ligada a lo visto en clase</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Instrucciones claras para madres y padres</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Con materiales que cualquier hogar tiene</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Una tarea por día, ligada a lo visto en clase</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Instrucciones claras para madres y padres</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Con materiales que cualquier hogar tiene</li>
           </ul>
         </div>
-        <div class="tab-mock" aria-hidden="true">
-          <div class="mock-bar"><i></i><i></i><i></i></div>
-          <div class="mock-line titulo" style="width:40%"></div>
-          <div class="mock-eval">
-            <div class="fila"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><span></span></div>
-            <div class="fila"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><span></span></div>
-            <div class="fila"><i></i><span></span></div>
-            <div class="fila"><i></i><span></span></div>
-            <div class="fila"><i></i><span></span></div>
+        <div class="tab-mock-stage">
+          <div class="tab-mock" aria-hidden="true" data-tilt data-tilt-base="5,-9" data-tilt-max="7" data-tilt-lift="0">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-line titulo" style="width:40%"></div>
+            <div class="mock-eval">
+              <div class="fila"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i><span></span></div>
+              <div class="fila"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i><span></span></div>
+              <div class="fila"><i></i><span></span></div>
+              <div class="fila"><i></i><span></span></div>
+              <div class="fila"><i></i><span></span></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="tab-panel" id="t3" role="tabpanel">
+      <div class="tab-panel" id="t3" role="tabpanel" aria-labelledby="tab-t3" tabindex="0">
         <div class="tab-txt">
           <h3>Materiales visuales listos para imprimir</h3>
           <p>Fichas, láminas e imágenes diseñadas para cada actividad. Nada de buscar recursos a las 11 de la noche.</p>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Imágenes y fichas hechas para tu tema de la semana</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Diseño claro, bonito y en blanco y negro amigable</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Organizado por día para imprimir de una vez</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Imágenes y fichas hechas para tu tema de la semana</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Diseño claro, bonito y en blanco y negro amigable</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Organizado por día para imprimir de una vez</li>
           </ul>
         </div>
-        <div class="tab-mock" aria-hidden="true">
-          <div class="mock-bar"><i></i><i></i><i></i></div>
-          <div class="mock-juego" style="grid-template-columns:repeat(2,1fr)">
-            <b style="aspect-ratio:1.4;font-size:1rem">🖼️</b>
-            <b style="aspect-ratio:1.4;font-size:1rem">📄</b>
-            <b style="aspect-ratio:1.4;font-size:1rem">✂️</b>
-            <b style="aspect-ratio:1.4;font-size:1rem">🗂️</b>
+        <div class="tab-mock-stage">
+          <div class="tab-mock" aria-hidden="true" data-tilt data-tilt-base="5,-9" data-tilt-max="7" data-tilt-lift="0">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-juego" style="grid-template-columns:repeat(2,1fr)">
+              <b style="aspect-ratio:1.4;font-size:1.6rem">🖼️</b>
+              <b style="aspect-ratio:1.4;font-size:1.6rem">📄</b>
+              <b style="aspect-ratio:1.4;font-size:1.6rem">✂️</b>
+              <b style="aspect-ratio:1.4;font-size:1.6rem">🗂️</b>
+            </div>
+            <div class="mock-line w80" style="margin-top:14px"></div>
+            <div class="mock-line w60"></div>
           </div>
-          <div class="mock-line w80" style="margin-top:14px"></div>
-          <div class="mock-line w60"></div>
         </div>
       </div>
 
-      <div class="tab-panel" id="t4" role="tabpanel">
+      <div class="tab-panel" id="t4" role="tabpanel" aria-labelledby="tab-t4" tabindex="0">
         <div class="tab-txt">
           <h3>Un juego interactivo cada semana</h3>
           <p>Un juego digital sobre el tema que estás enseñando. Ábrelo en el celular, la computadora o el proyector del aula.</p>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Memoramas, trivias, sopas de letras y retos</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Funciona en cualquier dispositivo, sin instalar nada</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Ideal para repaso en clase o en casa</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Memoramas, trivias, sopas de letras y retos</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Funciona en cualquier dispositivo, sin instalar nada</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Ideal para repaso en clase o en casa</li>
           </ul>
         </div>
-        <div class="tab-mock" aria-hidden="true">
-          <div class="mock-bar"><i></i><i></i><i></i></div>
-          <div class="mock-line titulo" style="width:48%"></div>
-          <div class="mock-juego">
-            <b>A</b><b>?</b><b>B</b><b>?</b><b>?</b><b>C</b><b>?</b><b>A</b>
+        <div class="tab-mock-stage">
+          <div class="tab-mock" data-tilt data-tilt-base="5,-9" data-tilt-max="4" data-tilt-lift="0">
+            <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+            <div class="memo-head">
+              <strong>Memorama de ecosistemas</strong>
+              <span class="memo-estado" id="memoEstado" aria-live="polite">¡Pruébalo! Encuentra los pares</span>
+            </div>
+            <div class="memo-grid" id="memo">
+              <div class="mock-juego" style="grid-column:1/-1" aria-hidden="true"><b>A</b><b>?</b><b>B</b><b>?</b><b>?</b><b>C</b><b>?</b><b>A</b></div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="tab-panel" id="t5" role="tabpanel">
+      <div class="tab-panel" id="t5" role="tabpanel" aria-labelledby="tab-t5" tabindex="0">
         <div class="tab-txt">
           <h3>Evaluación coherente con tu semana</h3>
           <p>Instrumentos de evaluación formativa que corresponden exactamente a lo que trabajaste, no formatos genéricos.</p>
           <ul>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Rúbricas y listas de cotejo por proyecto</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Evaluación diagnóstica, formativa y de cierre</li>
-            <li><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg> Listas para llenar y archivar como evidencia</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Rúbricas y listas de cotejo por proyecto</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Evaluación diagnóstica, formativa y de cierre</li>
+            <li><svg aria-hidden="true"><use href="#i-check"/></svg> Listas para llenar y archivar como evidencia</li>
           </ul>
         </div>
-        <div class="tab-mock" aria-hidden="true">
-          <div class="mock-bar"><i></i><i></i><i></i></div>
-          <div class="mock-line titulo" style="width:52%"></div>
-          <div class="mock-eval">
-            <div class="fila"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><span></span></div>
-            <div class="fila"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><span></span></div>
-            <div class="fila"><i><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></i><span></span></div>
-            <div class="fila"><i></i><span></span></div>
+        <div class="tab-mock-stage">
+          <div class="tab-mock" aria-hidden="true" data-tilt data-tilt-base="5,-9" data-tilt-max="7" data-tilt-lift="0">
+            <div class="mock-bar"><i></i><i></i><i></i></div>
+            <div class="mock-line titulo" style="width:52%"></div>
+            <div class="mock-eval">
+              <div class="fila"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i><span></span></div>
+              <div class="fila"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i><span></span></div>
+              <div class="fila"><i><svg aria-hidden="true"><use href="#i-check"/></svg></i><span></span></div>
+              <div class="fila"><i></i><span></span></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="reveal" style="text-align:center;margin-top:44px">
-      <a href="#" class="btn btn-dark" data-wa data-msg="Hola EDUVO 👋 ¿Me pueden mandar un ejemplo de una semana completa (planeación, materiales y juego)?">
+      <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-dark" data-wa data-msg="Hola EDUVO 👋 ¿Me pueden mandar un ejemplo de una semana completa (planeación, materiales y juego)?">
         Pedir un ejemplo real por WhatsApp →
       </a>
     </div>
@@ -913,33 +1294,33 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Por qué confiar en EDUVO</span>
-      <h2 style="margin-top:14px">Hecho con criterio pedagógico, no al aventón</h2>
+      <h2>Hecho con criterio pedagógico, no al aventón</h2>
       <p>Detrás de cada planeación hay un equipo que conoce la NEM, el aula mexicana y lo que significa tu carga de trabajo.</p>
     </div>
     <div class="conf-grid">
-      <div class="conf-item reveal">
-        <div class="cico"><svg viewBox="0 0 24 24"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 10v6"/></svg></div>
+      <div class="conf-item spot reveal" data-tilt data-tilt-max="4">
+        <div class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/><path d="M22 10v6"/></svg></div>
         <div>
           <h3>Equipo pedagógico real</h3>
           <p>Pedagogas con formación universitaria y experiencia en la Nueva Escuela Mexicana revisan la calidad de lo que recibes.</p>
         </div>
       </div>
-      <div class="conf-item reveal">
-        <div class="cico"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
+      <div class="conf-item spot reveal" data-tilt data-tilt-max="4">
+        <div class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
         <div>
           <h3>Formato oficial, sin sorpresas</h3>
           <p>Estructura institucional completa alineada al programa vigente: lo entregas a dirección con total tranquilidad.</p>
         </div>
       </div>
-      <div class="conf-item reveal">
-        <div class="cico"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-8-8"/><path d="M20 4l-8 8"/><path d="M15 4h5v5"/></svg></div>
+      <div class="conf-item spot reveal" data-tilt data-tilt-max="4">
+        <div class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-8-8"/><path d="M20 4l-8 8"/><path d="M15 4h5v5"/></svg></div>
         <div>
           <h3>Adaptado a tu contexto</h3>
           <p>Tu estado, tu comunidad y tu grupo importan: las actividades se piensan para tu realidad, no para un aula imaginaria.</p>
         </div>
       </div>
-      <div class="conf-item reveal">
-        <div class="cico"><svg viewBox="0 0 24 24"><path d="M8 10h8M8 14h5"/><path d="M21 12a9 9 0 1 1-4-7.5L21 3l-1 4z"/></svg></div>
+      <div class="conf-item spot reveal" data-tilt data-tilt-max="4">
+        <div class="cico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 10h8M8 14h5"/><path d="M21 12a9 9 0 1 1-4-7.5L21 3l-1 4z"/></svg></div>
         <div>
           <h3>Atención rápida por WhatsApp</h3>
           <p>¿Un ajuste, una duda, un cambio de última hora? Escribes y te respondemos rápido. Sin tickets ni correos perdidos.</p>
@@ -950,46 +1331,46 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
 </section>
 
 <!-- ==================== TESTIMONIOS ==================== -->
-<section class="section testi-sec" id="testimonios">
+<section class="section sec-papel" id="testimonios">
   <div class="wrap">
     <div class="section-head reveal">
       <span class="eyebrow">Voces del magisterio</span>
-      <h2 style="margin-top:14px">Docentes que ya recuperaron su tiempo</h2>
+      <h2>Docentes que ya recuperaron su tiempo</h2>
     </div>
     <div class="testis">
-      <div class="testi reveal">
-        <span class="comilla">“</span>
-        <p>Antes me quedaba los domingos hasta la noche armando la planeación. Ahora me llega lista, con todo y materiales. Mi directora quedó encantada con el formato.</p>
-        <div class="quien">
-          <span class="avatar" style="background:var(--pizarron-2)">MG</span>
+      <figure class="testi spot reveal" data-tilt data-tilt-max="5">
+        <span class="comilla" aria-hidden="true">“</span>
+        <blockquote><p>Antes me quedaba los domingos hasta la noche armando la planeación. Ahora me llega lista, con todo y materiales. Mi directora quedó encantada con el formato.</p></blockquote>
+        <figcaption class="quien">
+          <span class="avatar" style="background:var(--pizarron-2)" aria-hidden="true">MG</span>
           <div><strong>Mtra. María G.</strong><span>4º grado · Hidalgo</span></div>
+        </figcaption>
+        <div class="estrellas" role="img" aria-label="5 de 5 estrellas">
+          <svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg>
         </div>
-        <div class="estrellas" aria-label="5 estrellas">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg>
-        </div>
-      </div>
-      <div class="testi reveal">
-        <span class="comilla">“</span>
-        <p>Lo que más me sorprendió fue que las tareas sí toman en cuenta cómo es mi comunidad. Nada de pedir cosas que las familias no pueden conseguir.</p>
-        <div class="quien">
-          <span class="avatar" style="background:var(--cempasuchil-2)">JR</span>
+      </figure>
+      <figure class="testi spot reveal" data-tilt data-tilt-max="5">
+        <span class="comilla" aria-hidden="true">“</span>
+        <blockquote><p>Lo que más me sorprendió fue que las tareas sí toman en cuenta cómo es mi comunidad. Nada de pedir cosas que las familias no pueden conseguir.</p></blockquote>
+        <figcaption class="quien">
+          <span class="avatar" style="background:var(--cempasuchil-2)" aria-hidden="true">JR</span>
           <div><strong>Mtro. Jorge R.</strong><span>2º grado · Estado de México</span></div>
+        </figcaption>
+        <div class="estrellas" role="img" aria-label="5 de 5 estrellas">
+          <svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg>
         </div>
-        <div class="estrellas" aria-label="5 estrellas">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg>
-        </div>
-      </div>
-      <div class="testi reveal">
-        <span class="comilla">“</span>
-        <p>A mis alumnos les encanta el juego de la semana. Y a mí me encanta que si necesito un cambio, les escribo por WhatsApp y me lo resuelven el mismo día.</p>
-        <div class="quien">
-          <span class="avatar" style="background:var(--rosa)">AL</span>
+      </figure>
+      <figure class="testi spot reveal" data-tilt data-tilt-max="5">
+        <span class="comilla" aria-hidden="true">“</span>
+        <blockquote><p>A mis alumnos les encanta el juego de la semana. Y a mí me encanta que si necesito un cambio, les escribo por WhatsApp y me lo resuelven el mismo día.</p></blockquote>
+        <figcaption class="quien">
+          <span class="avatar" style="background:var(--rosa)" aria-hidden="true">AL</span>
           <div><strong>Mtra. Alejandra L.</strong><span>6º grado · Querétaro</span></div>
+        </figcaption>
+        <div class="estrellas" role="img" aria-label="5 de 5 estrellas">
+          <svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg><svg aria-hidden="true"><use href="#i-star"/></svg>
         </div>
-        <div class="estrellas" aria-label="5 estrellas">
-          <svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg><svg viewBox="0 0 24 24"><path d="M12 2l3 6.5 7 .8-5.2 4.8 1.4 7-6.2-3.6L5.8 21l1.4-7L2 9.3l7-.8z"/></svg>
-        </div>
-      </div>
+      </figure>
     </div>
   </div>
 </section>
@@ -999,55 +1380,55 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
   <div class="wrap faq-grid">
     <div class="faq-lado reveal">
       <span class="eyebrow">Preguntas frecuentes</span>
-      <h2 style="margin-top:14px">Lo que las maestras y maestros nos preguntan</h2>
+      <h2>Lo que las maestras y maestros nos preguntan</h2>
       <p style="margin-top:14px;color:var(--tinta-suave)">¿Tienes otra duda? Escríbenos directo y te contestamos rápido.</p>
       <div style="margin-top:22px">
-        <a href="#" class="btn btn-dark" data-wa data-msg="Hola EDUVO 👋 Tengo una duda antes de empezar:">Preguntar por WhatsApp</a>
+        <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-dark" data-wa data-msg="Hola EDUVO 👋 Tengo una duda antes de empezar:">Preguntar por WhatsApp</a>
       </div>
-      <svg class="buho-faq" viewBox="0 0 120 120" aria-hidden="true"><use href="#buho"/></svg>
+      <svg class="buho buho-faq" viewBox="0 0 120 120" aria-hidden="true" data-vivo><use href="#buho"/></svg>
     </div>
     <div class="reveal">
       <details class="faq">
         <summary>¿Las planeaciones están alineadas a la Nueva Escuela Mexicana?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Sí, completamente. Trabajamos con el programa vigente, los campos formativos, las metodologías activas y los procesos de desarrollo de aprendizaje oficiales. El formato es institucional y está pensado para entregarse a dirección tal como llega.</div>
+        <div class="resp"><p>Sí, completamente. Trabajamos con el programa vigente, los campos formativos, las metodologías activas y los procesos de desarrollo de aprendizaje oficiales. El formato es institucional y está pensado para entregarse a dirección tal como llega.</p></div>
       </details>
       <details class="faq">
         <summary>¿Para qué grados funciona?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Para todos los grados de primaria, de 1º a 6º. Cada planeación se prepara específicamente para tu grado y las características de tu grupo.</div>
+        <div class="resp"><p>Para todos los grados de primaria, de 1º a 6º. Cada planeación se prepara específicamente para tu grado y las características de tu grupo.</p></div>
       </details>
       <details class="faq">
         <summary>¿Cómo recibo mi planeación cada semana?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Directo en tu WhatsApp, puntual cada semana. Recibes tu planeación completa lista para imprimir, junto con los materiales, las tareas, el juego interactivo y los instrumentos de evaluación.</div>
+        <div class="resp"><p>Directo en tu WhatsApp, puntual cada semana. Recibes tu planeación completa lista para imprimir, junto con los materiales, las tareas, el juego interactivo y los instrumentos de evaluación.</p></div>
       </details>
       <details class="faq">
         <summary>¿Puedo pedir ajustes o cambios?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Claro. Si algo no encaja con tu grupo, tu escuela o tu semana, nos escribes por el mismo chat y lo ajustamos rápido. La idea es que todo te sirva de verdad, no que te llegue y ya.</div>
+        <div class="resp"><p>Claro. Si algo no encaja con tu grupo, tu escuela o tu semana, nos escribes por el mismo chat y lo ajustamos rápido. La idea es que todo te sirva de verdad, no que te llegue y ya.</p></div>
       </details>
       <details class="faq">
         <summary>¿Sirve para mi comunidad, aunque sea rural o con pocos recursos?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Precisamente para eso está pensado. Antes de preparar tu primera semana te preguntamos por tu contexto, y las actividades y tareas se calibran a lo que tus alumnos y sus familias realmente tienen a la mano.</div>
+        <div class="resp"><p>Precisamente para eso está pensado. Antes de preparar tu primera semana te preguntamos por tu contexto, y las actividades y tareas se calibran a lo que tus alumnos y sus familias realmente tienen a la mano.</p></div>
       </details>
       <details class="faq">
         <summary>¿Cuánto cuesta?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">Tenemos planes accesibles pensados para el bolsillo docente, según lo que necesites cada semana. Escríbenos por WhatsApp y te compartimos las opciones sin ningún compromiso.</div>
+        <div class="resp"><p>Tenemos planes accesibles pensados para el bolsillo docente, según lo que necesites cada semana. Escríbenos por WhatsApp y te compartimos las opciones sin ningún compromiso.</p></div>
       </details>
       <details class="faq">
         <summary>¿Tengo que instalar algo o aprender una plataforma?
-          <span class="mas"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          <span class="mas" aria-hidden="true"><svg><use href="#i-mas"/></svg></span>
         </summary>
-        <div class="resp">No. Todo funciona por WhatsApp, la app que ya usas todos los días. Sin registros complicados, sin contraseñas nuevas, sin curva de aprendizaje.</div>
+        <div class="resp"><p>No. Todo funciona por WhatsApp, la app que ya usas todos los días. Sin registros complicados, sin contraseñas nuevas, sin curva de aprendizaje.</p></div>
       </details>
     </div>
   </div>
@@ -1056,32 +1437,44 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
 <!-- ==================== CTA FINAL ==================== -->
 <section class="section" style="padding-top:0">
   <div class="wrap">
-    <div class="cta-final reveal">
-      <svg class="buho-cta" viewBox="0 0 120 120" aria-hidden="true"><use href="#buho"/></svg>
+    <div class="cta-final reveal" id="ctaFinal">
+      <div class="cta-halo" id="ctaHalo" aria-hidden="true"></div>
+      <div class="petalos" aria-hidden="true">
+        <i style="--x:8%;--s:12px;--t:11s;--d:0s;--dx:40px"></i>
+        <i style="--x:19%;--s:8px;--t:9s;--d:3.2s;--dx:-30px;--c:var(--rosa)"></i>
+        <i style="--x:31%;--s:14px;--t:13s;--d:6s;--dx:60px"></i>
+        <i style="--x:46%;--s:9px;--t:10s;--d:1.5s;--dx:-50px"></i>
+        <i style="--x:58%;--s:12px;--t:12s;--d:7.5s;--dx:30px"></i>
+        <i style="--x:69%;--s:7px;--t:8.5s;--d:4.4s;--dx:-20px;--c:var(--rosa)"></i>
+        <i style="--x:81%;--s:13px;--t:12.5s;--d:2.2s;--dx:-60px"></i>
+        <i style="--x:92%;--s:9px;--t:10.5s;--d:5.6s;--dx:-35px"></i>
+      </div>
+      <svg class="buho buho-cta" viewBox="0 0 120 120" aria-hidden="true" data-vivo><use href="#buho"/></svg>
       <h2>Esta semana, llega con todo <em>resuelto</em></h2>
       <p>Cuéntanos tu grado y cómo es tu grupo. En un solo mensaje empiezas a recuperar tu tiempo.</p>
-      <a href="#" class="btn btn-wa" data-wa data-msg="Hola EDUVO 👋 Quiero mi planeación semanal. Soy docente de primaria y me gustaría conocer los planes.">
-        <svg class="wa-ico" viewBox="0 0 24 24" fill="#06301A"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+      <a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="btn btn-wa" data-wa data-magnet data-msg="Hola EDUVO 👋 Quiero mi planeación semanal. Soy docente de primaria y me gustaría conocer los planes.">
+        <svg class="wa-ico" aria-hidden="true"><use href="#i-wa"/></svg>
         Hablar con EDUVO ahora
       </a>
       <div class="nota">Respondemos rápido · Sin compromiso · Atención humana</div>
     </div>
   </div>
 </section>
+</main>
 
 <!-- ==================== FOOTER ==================== -->
 <footer class="footer">
   <div class="wrap">
     <div class="footer-grid">
       <div>
-        <a href="#" class="logo" aria-label="EDUVO">
-          <svg class="logo-mark" viewBox="0 0 100 100"><use href="#marca"/></svg>
+        <a href="#inicio" class="logo" aria-label="EDUVO, volver al inicio">
+          <svg class="logo-mark" viewBox="0 0 100 100" aria-hidden="true"><use href="#marca"/></svg>
           <span class="logo-word">EDU<em>VO</em></span>
         </a>
         <p>Planeaciones, materiales y evaluaciones para docentes de primaria en México, alineadas a la Nueva Escuela Mexicana. Tu tiempo, de vuelta.</p>
       </div>
       <div>
-        <h5>Explora</h5>
+        <h2 class="h5">Explora</h2>
         <ul>
           <li><a href="#servicios">Qué recibes</a></li>
           <li><a href="#como-funciona">Cómo funciona</a></li>
@@ -1090,24 +1483,24 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
         </ul>
       </div>
       <div>
-        <h5>Contacto</h5>
+        <h2 class="h5">Contacto</h2>
         <ul>
-          <li><a href="#" data-wa data-msg="¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊">WhatsApp: +52 56 5617 8601</a></li>
+          <li><a href="https://wa.me/525656178601" target="_blank" rel="noopener" data-wa>WhatsApp: +52 56 5617 8601</a></li>
           <li><a href="mailto:eduvo.mx@proton.me">eduvo.mx@proton.me</a></li>
         </ul>
       </div>
     </div>
     <div class="footer-base">
-      <span>© 2026 EDUVO · Hecho en México con criterio pedagógico 🇲🇽</span>
-      <span>Educación primaria · Nueva Escuela Mexicana</span>
+      <span>© 2026 EDUVO · Hecho en México con criterio pedagógico <svg class="bandera" viewBox="0 0 21 12" aria-label="México" role="img"><rect width="7" height="12" fill="#006847"/><rect x="7" width="7" height="12" fill="#fff"/><rect x="14" width="7" height="12" fill="#CE1126"/><circle cx="10.5" cy="6" r="1.7" fill="#8C5A2B"/></svg></span>
+      <a href="#inicio">Volver arriba ↑</a>
     </div>
   </div>
 </footer>
 
 <!-- ==================== WHATSAPP FLOTANTE ==================== -->
-<div class="wa-tip" id="waTip">¿Dudas? Escríbenos 👋</div>
-<a href="#" class="wa-float" data-wa data-msg="¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊" aria-label="Abrir chat de WhatsApp con EDUVO">
-  <svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5.1-1.3A10 10 0 1 0 12 2zm5.3 14.1c-.2.6-1.3 1.2-1.8 1.3-.5 0-1 .2-3.4-.7-2.9-1.1-4.7-4-4.9-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.4.7-.4h.5c.2 0 .4 0 .6.5l.9 2.1c.1.2.1.4 0 .6l-.4.6-.4.5c-.1.1-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1.1 2.2 1.4 2.5 1.5.3.2.5.1.7-.1l1-1.2c.2-.3.4-.2.7-.1l2 .9c.3.2.5.3.6.4 0 .1 0 .5-.2 1z"/></svg>
+<div class="wa-tip" id="waTip" aria-hidden="true">¿Dudas? Escríbenos 👋</div>
+<a href="https://wa.me/525656178601" target="_blank" rel="noopener" class="wa-float" id="waFloat" data-wa aria-label="Abrir chat de WhatsApp con EDUVO">
+  <svg aria-hidden="true"><use href="#i-wa"/></svg>
 </a>
 
 <script>
@@ -1117,90 +1510,583 @@ h2{font-size:clamp(1.9rem,4.2vw,2.9rem);color:var(--pizarron-3)}
    Ejemplo México: "525556789012"
    ============================================================ */
 const WA_NUMBER = "525656178601";
+const WA_DEFAULT = "¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊";
 
-/* ---- Conector WhatsApp: todos los CTAs con data-wa ---- */
-document.querySelectorAll("[data-wa]").forEach(el=>{
-  el.addEventListener("click",e=>{
+(() => {
+"use strict";
+const $  = (s, c = document) => c.querySelector(s);
+const $$ = (s, c = document) => [...c.querySelectorAll(s)];
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const lerp  = (a, b, t) => a + (b - a) * t;
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const finePointer = matchMedia("(hover: hover) and (pointer: fine)").matches;
+const mqNarrow = matchMedia("(max-width: 980px)");
+
+/* ---- Conector WhatsApp: links reales (se pueden abrir en otra pestaña o copiar) ---- */
+$$("[data-wa]").forEach(el => {
+  el.href = `https://wa.me/${WA_NUMBER}?text=${encodeURIComponent(el.dataset.msg || WA_DEFAULT)}`;
+});
+
+/* ---- Estado global del puntero ---- */
+const ptr = { x: innerWidth / 2, y: innerHeight / 2, seen: false };
+addEventListener("pointermove", e => {
+  if (e.pointerType !== "mouse") return;
+  ptr.x = e.clientX; ptr.y = e.clientY; ptr.seen = true;
+}, { passive: true });
+
+/* ---- Visibilidad de elementos (para no animar lo que no se ve) ---- */
+const watchVisible = (el, cb, opts) => new IntersectionObserver(([e]) => cb(e.isIntersecting), opts).observe(el);
+
+/* ============================================================
+   Scroll: barra de progreso, navbar, parallax del hero, ruta
+   ============================================================ */
+const nav = $("#nav"), barra = $("#progreso"), hero = $(".hero"), heroCopy = $("#heroCopy");
+let heroScroll = 0;
+const scrollHandlers = [];
+function onScroll() {
+  const y = scrollY, max = document.documentElement.scrollHeight - innerHeight;
+  nav.classList.toggle("scrolled", y > 30);
+  barra.style.transform = `scaleX(${max > 0 ? clamp(y / max) : 0})`;
+  heroScroll = clamp(y / hero.offsetHeight);
+  if (!reduced) {
+    heroCopy.style.transform = `translate3d(0,${(-heroScroll * 70).toFixed(1)}px,0)`;
+    heroCopy.style.opacity = (1 - heroScroll * .85).toFixed(3);
+  }
+  scrollHandlers.forEach(f => f());
+}
+let scrollTick = false;
+addEventListener("scroll", () => {
+  if (scrollTick) return;
+  scrollTick = true;
+  requestAnimationFrame(() => { scrollTick = false; onScroll(); });
+}, { passive: true });
+
+/* ---- Link activo en el menú según la sección visible ---- */
+const navLinks = $$(".nav-links a:not(.btn)");
+const secIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    navLinks.forEach(a => a.classList.toggle("activo", a.getAttribute("href") === "#" + e.target.id));
+  });
+}, { rootMargin: "-45% 0px -50% 0px" });
+$$("main section[id]").forEach(s => secIO.observe(s));
+
+/* ============================================================
+   Menú móvil accesible (Esc, foco atrapado, scroll bloqueado)
+   ============================================================ */
+const mm = $("#mobileMenu"), menuBtn = $("#menuBtn"), closeBtn = $("#closeBtn");
+function setMenu(open, returnFocus = true) {
+  mm.classList.toggle("open", open);
+  document.body.classList.toggle("menu-abierto", open);
+  menuBtn.setAttribute("aria-expanded", String(open));
+  if (open) setTimeout(() => closeBtn.focus(), 60);
+  else if (returnFocus) menuBtn.focus({ preventScroll: true });
+}
+menuBtn.addEventListener("click", () => setMenu(true));
+closeBtn.addEventListener("click", () => setMenu(false));
+mm.querySelectorAll("a").forEach(a => a.addEventListener("click", () => setMenu(false, false)));
+document.addEventListener("keydown", e => {
+  if (!mm.classList.contains("open")) return;
+  if (e.key === "Escape") { setMenu(false); return; }
+  if (e.key === "Tab") {
+    const f = $$("a,button", mm), first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+matchMedia("(min-width: 681px)").addEventListener("change", e => { if (e.matches) setMenu(false, false); });
+
+/* ============================================================
+   Aparición en scroll (3D, escalonada)
+   ============================================================ */
+const revIO = new IntersectionObserver(entries => {
+  entries.filter(e => e.isIntersecting).forEach((e, i) => {
+    revIO.unobserve(e.target);
+    setTimeout(() => e.target.classList.add("in"), reduced ? 0 : i * 95);
+  });
+}, { threshold: .12, rootMargin: "0px 0px -6% 0px" });
+$$(".reveal").forEach(el => revIO.observe(el));
+
+/* ---- Contadores ---- */
+const cntIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    cntIO.unobserve(e.target);
+    const el = e.target, to = +el.dataset.count;
+    if (reduced) return;
+    const t0 = performance.now() + 900, dur = 1300;
+    const step = now => {
+      const p = clamp((now - t0) / dur);
+      el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}, { threshold: .6 });
+$$("[data-count]").forEach(el => cntIO.observe(el));
+
+/* ============================================================
+   Inclinación 3D con destello de luz en tarjetas (solo mouse)
+   ============================================================ */
+function tilt(el) {
+  const max  = +(el.dataset.tiltMax || 6);
+  const lift = +(el.dataset.tiltLift ?? -6);
+  const [bx, by] = (el.dataset.tiltBase || "0,0").split(",").map(Number);
+  let tx = 0, ty = 0, tl = 0, cx = 0, cy = 0, cl = 0, raf = 0;
+  const paint = () => {
+    el.style.transform = `translateY(${cl.toFixed(2)}px) rotateX(${(bx + cy).toFixed(2)}deg) rotateY(${(by + cx).toFixed(2)}deg)`;
+  };
+  const frame = () => {
+    cx = lerp(cx, tx, .14); cy = lerp(cy, ty, .14); cl = lerp(cl, tl, .16);
+    paint();
+    raf = Math.abs(tx - cx) + Math.abs(ty - cy) + Math.abs(tl - cl) > .01 ? requestAnimationFrame(frame) : 0;
+  };
+  const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+  el.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    tx = (x - .5) * max * 2; ty = -(y - .5) * max * 2; tl = lift;
+    el.style.setProperty("--sx", (x * 100).toFixed(1) + "%");
+    el.style.setProperty("--sy", (y * 100).toFixed(1) + "%");
+    kick();
+  });
+  el.addEventListener("pointerleave", () => { tx = ty = tl = 0; kick(); });
+  paint();
+}
+if (finePointer && !reduced) $$("[data-tilt]").forEach(tilt);
+
+/* ---- Botones magnéticos ---- */
+if (finePointer && !reduced) $$("[data-magnet]").forEach(b => {
+  b.addEventListener("pointermove", e => {
+    const r = b.getBoundingClientRect();
+    const x = e.clientX - (r.left + r.width / 2), y = e.clientY - (r.top + r.height / 2);
+    b.style.translate = `${(x * .18).toFixed(1)}px ${(y * .3).toFixed(1)}px`;
+  });
+  b.addEventListener("pointerleave", () => { b.style.translate = ""; });
+});
+
+/* ============================================================
+   Búhos vivos: los ojos siguen al cursor y parpadean
+   ============================================================ */
+const OWL = id => `
+  <defs><clipPath id="ojos-${id}"><circle cx="44" cy="62" r="13.3"/><circle cx="76" cy="62" r="13.3"/></clipPath></defs>
+  <ellipse cx="60" cy="78" rx="34" ry="38" fill="#1D4A3C"/>
+  <path d="M26 62 Q60 34 94 62 L94 82 Q60 60 26 82 Z" fill="#14342B"/>
+  <path d="M32 46 L44 30 L50 48 Z" fill="#14342B"/>
+  <path d="M88 46 L76 30 L70 48 Z" fill="#14342B"/>
+  <circle cx="44" cy="62" r="15" fill="#FBF8F1"/>
+  <circle cx="76" cy="62" r="15" fill="#FBF8F1"/>
+  <g class="pupilas" transform="translate(2 2)">
+    <circle cx="44" cy="62" r="5.5" fill="#14342B"/><circle cx="76" cy="62" r="5.5" fill="#14342B"/>
+    <circle cx="46" cy="60" r="1.8" fill="#FBF8F1"/><circle cx="78" cy="60" r="1.8" fill="#FBF8F1"/>
+  </g>
+  <g clip-path="url(#ojos-${id})"><rect class="parpado" x="28" y="46" width="64" height="32" fill="#1D4A3C"/></g>
+  <circle cx="44" cy="62" r="15" fill="none" stroke="#F0A63A" stroke-width="3.5"/>
+  <circle cx="76" cy="62" r="15" fill="none" stroke="#F0A63A" stroke-width="3.5"/>
+  <line x1="59" y1="62" x2="61" y2="62" stroke="#F0A63A" stroke-width="3.5" stroke-linecap="round"/>
+  <path d="M55 76 L65 76 L60 85 Z" fill="#F0A63A"/>
+  <path d="M42 96 Q60 106 78 96 Q60 116 42 96 Z" fill="#F0A63A" opacity=".9"/>
+  <path d="M30 84 Q22 96 30 106 Q38 98 36 86 Z" fill="#14342B"/>
+  <path d="M90 84 Q98 96 90 106 Q82 98 84 86 Z" fill="#14342B"/>`;
+
+const owls = reduced ? [] : $$("svg.buho[data-vivo]").map((svg, i) => {
+  svg.innerHTML = OWL(i);
+  const o = { svg, pup: $(".pupilas", svg), lid: $(".parpado", svg), visible: false, cx: .45, cy: .45, tx: .45, ty: .45, next: 0 };
+  watchVisible(svg, v => (o.visible = v));
+  o.lid.addEventListener("animationend", () => o.lid.classList.remove("parpadea"));
+  const blink = () => {
+    if (o.visible && !document.hidden) {
+      o.lid.classList.add("parpadea");
+      if (Math.random() < .25) setTimeout(() => { o.lid.classList.remove("parpadea"); void o.lid.getBoundingClientRect(); o.lid.classList.add("parpadea"); }, 320);
+    }
+    setTimeout(blink, 2600 + Math.random() * 3800);
+  };
+  setTimeout(blink, 1200 + Math.random() * 2000);
+  o.frame = t => {
+    let lx, ly;
+    if (ptr.seen) {
+      const r = svg.getBoundingClientRect();
+      const dx = ptr.x - (r.left + r.width * .5), dy = ptr.y - (r.top + r.height * .52);
+      const d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 240);
+      lx = dx / d * k; ly = dy / d * k;
+    } else {
+      if (t > o.next) { o.tx = Math.random() * 1.8 - .9; o.ty = Math.random() * 1.2 - .5; o.next = t + 1600 + Math.random() * 2400; }
+      lx = o.tx; ly = o.ty;
+    }
+    o.cx = lerp(o.cx, lx, .14); o.cy = lerp(o.cy, ly, .14);
+    o.pup.setAttribute("transform", `translate(${(o.cx * 4.6).toFixed(2)} ${(o.cy * 4.6).toFixed(2)})`);
+  };
+  return o;
+});
+
+/* ============================================================
+   Hero: polvo de gis, profundidad con el cursor y el scroll
+   ============================================================ */
+const stage = $("#planStage"), p3d = $("#plan3d"), brillo = $("#brillo");
+const hojas = $$(".hoja", p3d);
+const trama = $(".hero-trama"), halo = $(".hero-halo");
+let heroVisible = true;
+watchVisible(hero, v => (heroVisible = v));
+
+const polvo = (() => {
+  const c = $("#polvo"), ctx = c.getContext("2d");
+  let w = 0, h = 0, parts = [], last = 0;
+  const mk = init => ({
+    x: Math.random() * w, y: init ? Math.random() * h : h + 8,
+    r: Math.random() * 1.5 + .4, z: Math.random() * .8 + .2,
+    vy: Math.random() * .018 + .006, ph: Math.random() * 6.28,
+    a: Math.random() * .2 + .05, amber: Math.random() < .14
+  });
+  const size = () => {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    w = c.clientWidth; h = c.clientHeight;
+    c.width = w * dpr; c.height = h * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    parts = Array.from({ length: w < 700 ? 24 : 48 }, () => mk(true));
+  };
+  return {
+    size,
+    draw(t, mx, my) {
+      const dt = Math.min(50, t - (last || t)); last = t;
+      ctx.clearRect(0, 0, w, h);
+      for (const p of parts) {
+        p.y -= p.vy * p.z * dt;
+        p.x += Math.sin(t / 1900 + p.ph) * .08 * p.z;
+        if (p.y < -10) Object.assign(p, mk(false));
+        ctx.globalAlpha = p.a;
+        ctx.fillStyle = p.amber ? "#F0A63A" : "#FBF8F1";
+        ctx.beginPath();
+        ctx.arc(p.x - mx * 46 * p.z, p.y - my * 30 * p.z, p.r * p.z + .35, 0, 6.2832);
+        ctx.fill();
+      }
+    }
+  };
+})();
+
+const cur = { rx: 4, ry: -7, fan: 0, gx: 78, gy: 6, mx: 0, my: 0 };
+function heroFrame(t) {
+  const narrow = mqNarrow.matches;
+  const bX = narrow ? 2 : 4, bY = narrow ? -3 : -7;
+  let tx = bX, ty = bY, sx = 0, sy = 0, inside = false, hx = 0, hy = 0;
+  if (ptr.seen) {
+    const r = stage.getBoundingClientRect(), hr = hero.getBoundingClientRect();
+    sx = clamp((ptr.x - r.left) / r.width - .5, -.8, .8);
+    sy = clamp((ptr.y - r.top) / r.height - .5, -.8, .8);
+    inside = Math.abs(sx) < .6 && Math.abs(sy) < .6 && ptr.y < hr.bottom;
+    hx = clamp((ptr.x - hr.left) / hr.width - .5, -.5, .5);
+    hy = clamp((ptr.y - hr.top) / hr.height - .5, -.5, .5);
+    tx = bX - sy * 14; ty = bY + sx * 18;
+  } else {
+    tx = bX + Math.sin(t / 2300) * 2.4;
+    ty = bY + Math.sin(t / 3100) * 4.5;
+  }
+  tx += heroScroll * 16;
+  cur.rx = lerp(cur.rx, tx, .08);
+  cur.ry = lerp(cur.ry, ty, .08);
+  cur.fan = lerp(cur.fan, clamp(Math.max(inside ? 1 : 0, heroScroll * 1.8)), .07);
+  cur.mx = lerp(cur.mx, hx, .06); cur.my = lerp(cur.my, hy, .06);
+  const gx = ptr.seen ? 50 + sx * 120 : 60 + Math.sin(t / 2600) * 30;
+  const gy = ptr.seen ? 20 + sy * 120 : 12 + Math.cos(t / 3000) * 18;
+  cur.gx = lerp(cur.gx, gx, .1); cur.gy = lerp(cur.gy, gy, .1);
+
+  p3d.style.transform = `translate3d(0,${(-heroScroll * 50).toFixed(1)}px,0) rotateX(${cur.rx.toFixed(2)}deg) rotateY(${cur.ry.toFixed(2)}deg)`;
+  const f = cur.fan;
+  hojas[0].style.transform = `translate3d(${28 + f * 34}px,${-22 - f * 20}px,${-80 - f * 70}px) rotateZ(${5 + f * 4.5}deg)`;
+  hojas[1].style.transform = `translate3d(${14 + f * 18}px,${-12 - f * 10}px,${-40 - f * 35}px) rotateZ(${2.5 + f * 2.2}deg)`;
+  brillo.style.setProperty("--gx", cur.gx.toFixed(1) + "%");
+  brillo.style.setProperty("--gy", cur.gy.toFixed(1) + "%");
+  trama.style.transform = `translate3d(${(cur.mx * -18).toFixed(1)}px,${(cur.my * -14).toFixed(1)}px,0)`;
+  halo.style.transform = `translate3d(${(cur.mx * 60).toFixed(1)}px,${(cur.my * 50 + heroScroll * 120).toFixed(1)}px,0)`;
+  polvo.draw(t, cur.mx, cur.my);
+}
+
+/* ---- CTA final: el halo sigue al cursor ---- */
+const cta = $("#ctaFinal"), ctaHalo = $("#ctaHalo");
+let ctaVisible = false;
+watchVisible(cta, v => (ctaVisible = v));
+const ctaCur = { x: .5, y: 1 };
+if (!reduced) ctaHalo.style.left = ctaHalo.style.top = "0";
+function ctaFrame() {
+  const r = cta.getBoundingClientRect();
+  let x = .5, y = 1;
+  if (ptr.seen && ptr.y > r.top && ptr.y < r.bottom) { x = (ptr.x - r.left) / r.width; y = (ptr.y - r.top) / r.height; }
+  ctaCur.x = lerp(ctaCur.x, x, .06); ctaCur.y = lerp(ctaCur.y, y, .06);
+  ctaHalo.style.transform = `translate(${(ctaCur.x * r.width).toFixed(1)}px,${(ctaCur.y * r.height).toFixed(1)}px)`;
+}
+
+/* ---- Un solo ciclo de animación para todo ---- */
+if (!reduced) {
+  polvo.size();
+  let rsz;
+  addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(polvo.size, 150); });
+  const loop = t => {
+    if (heroVisible) heroFrame(t);
+    if (ctaVisible) ctaFrame();
+    for (const o of owls) if (o.visible) o.frame(t);
+    requestAnimationFrame(loop);
+  };
+  requestAnimationFrame(loop);
+} else {
+  $("#polvo").remove();
+}
+
+/* ============================================================
+   La planeación que se escribe sola: rota entre grados
+   ============================================================ */
+const PLANES = [
+  { grado: "3º de primaria", titulo: "Proyecto: Los ecosistemas de mi comunidad", filas: [
+    ["Inicio.", "Exploración: ¿qué seres vivos hay cerca?"],
+    ["Desarrollo.", "Recorrido y registro de observaciones"],
+    ["Desarrollo.", "Cadenas alimentarias con material impreso"],
+    ["Juego.", "Memorama interactivo de ecosistemas"],
+    ["Cierre.", "Presentación y evaluación con rúbrica"] ] },
+  { grado: "1º de primaria", titulo: "Proyecto: Mi nombre cuenta una historia", filas: [
+    ["Inicio.", "Conversamos: ¿quién eligió mi nombre?"],
+    ["Desarrollo.", "Escribimos nuestro nombre con letras móviles"],
+    ["Desarrollo.", "Entrevista en familia sobre mi nombre"],
+    ["Juego.", "Lotería con los nombres del grupo"],
+    ["Cierre.", "Mural “Así me llamo” y lista de cotejo"] ] },
+  { grado: "5º de primaria", titulo: "Proyecto: El agua en nuestra comunidad", filas: [
+    ["Inicio.", "Lluvia de ideas: ¿de dónde llega el agua?"],
+    ["Desarrollo.", "Medimos cuánta agua usamos en casa"],
+    ["Desarrollo.", "Graficamos los datos del grupo"],
+    ["Juego.", "Trivia interactiva del ciclo del agua"],
+    ["Cierre.", "Campaña de cuidado y evaluación con rúbrica"] ] }
+];
+const filas = $$(".plan-row"), tituloEl = $("#planTitle"), gradoEl = $("#planGrado"), sello = $(".plan-foot .sello");
+const activo = async ms => { await sleep(ms); while (!heroVisible || document.hidden) await sleep(400); };
+
+async function mostrarFilas() {
+  for (const r of filas) {
+    r.classList.remove("sale"); r.classList.add("show");
+    const chk = $(".check", r);
+    setTimeout(() => chk.classList.add("on"), 480);
+    await sleep(380);
+  }
+  await sleep(650);
+  sello.classList.remove("estampa"); void sello.offsetWidth; sello.classList.add("estampa");
+}
+async function ocultarFilas() {
+  tituloEl.classList.add("borra");
+  for (const r of [...filas].reverse()) {
+    r.classList.remove("show"); r.classList.add("sale");
+    $(".check", r).classList.remove("on");
+    await sleep(70);
+  }
+  await sleep(420);
+}
+function pintarPlan(plan) {
+  gradoEl.textContent = plan.grado;
+  gradoEl.classList.remove("flip"); void gradoEl.offsetWidth; gradoEl.classList.add("flip");
+  filas.forEach((r, i) => {
+    const linea = $(".linea", r), b = document.createElement("b");
+    b.textContent = plan.filas[i][0];
+    linea.replaceChildren(b, " " + plan.filas[i][1]);
+  });
+}
+async function escribir(texto) {
+  tituloEl.style.minHeight = tituloEl.offsetHeight + "px";
+  tituloEl.textContent = "";
+  tituloEl.classList.remove("borra");
+  tituloEl.classList.add("escribiendo");
+  for (let i = 1; i <= texto.length; i++) {
+    tituloEl.textContent = texto.slice(0, i);
+    await sleep(26 + Math.random() * 34);
+  }
+  await sleep(260);
+  tituloEl.classList.remove("escribiendo");
+  tituloEl.style.minHeight = "";
+}
+async function cicloPlanes() {
+  let k = 0;
+  await sleep(750);
+  await mostrarFilas();
+  for (;;) {
+    await activo(5200);
+    k = (k + 1) % PLANES.length;
+    await ocultarFilas();
+    pintarPlan(PLANES[k]);
+    await escribir(PLANES[k].titulo);
+    await mostrarFilas();
+  }
+}
+if (reduced) filas.forEach(r => { r.classList.add("show"); $(".check", r).classList.add("on"); });
+else cicloPlanes();
+
+/* ============================================================
+   Cómo funciona: el avión de papel recorre los pasos al bajar
+   ============================================================ */
+(() => {
+  const wrap = $("#pasosWrap"), ruta = $(".ruta", wrap);
+  const fill = $(".ruta-fill", wrap), avion = $(".avion", wrap);
+  const nodos = $$(".ruta-nodo", wrap), pasos = $$(".paso", wrap);
+  let a = 0, b = 1, marks = [0, .5, 1];
+  const medir = () => {
+    // offsetLeft/offsetTop ignoran las transformaciones de la animación de entrada
+    const vert = mqNarrow.matches;
+    const pos = pasos.map(p => vert ? p.offsetTop + 54 : p.offsetLeft + p.offsetWidth / 2);
+    a = pos[0]; b = pos[pos.length - 1];
+    marks = pos.map(p => (p - a) / (b - a || 1));
+    ruta.style.setProperty("--a", a + "px");
+    ruta.style.setProperty("--b", b + "px");
+    nodos.forEach((n, i) => n.style.setProperty("--pos", pos[i] + "px"));
+  };
+  const update = () => {
+    const r = wrap.getBoundingClientRect(), vh = innerHeight;
+    const p = clamp((vh * .82 - r.top) / (r.height * .9 + vh * .25));
+    const vert = mqNarrow.matches, at = a + p * (b - a);
+    fill.style.transform = vert ? `scaleY(${p.toFixed(4)})` : `scaleX(${p.toFixed(4)})`;
+    avion.style.transform = vert ? `translate3d(0,${at.toFixed(1)}px,0)` : `translate3d(${at.toFixed(1)}px,0,0)`;
+    marks.forEach((m, i) => {
+      const lit = p >= m - .02;
+      nodos[i].classList.toggle("lit", lit);
+      pasos[i].classList.toggle("lit", lit);
+    });
+  };
+  medir();
+  if (reduced) { nodos.forEach(n => n.classList.add("lit")); return; }
+  wrap.classList.add("ruta-activa");
+  update();
+  scrollHandlers.push(update);
+  let rsz;
+  addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(() => { medir(); update(); }, 120); });
+  document.fonts && document.fonts.ready.then(() => { medir(); update(); });
+})();
+
+/* ============================================================
+   Materiales: pestañas con píldora deslizante, teclado y recorrido automático
+   ============================================================ */
+(() => {
+  const zona = $("#tabs"), bar = $(".tabs-bar", zona), pill = $(".tab-pill", bar);
+  const btns = $$(".tab-btn", bar);
+  let auto = !reduced, enVista = false;
+
+  const moverPill = btn => {
+    pill.style.width = btn.offsetWidth + "px";
+    pill.style.height = btn.offsetHeight + "px";
+    pill.style.transform = `translate(${btn.offsetLeft}px,${btn.offsetTop}px)`;
+  };
+  const correr = () => {
+    pill.classList.remove("corre"); void pill.offsetWidth;
+    if (auto && enVista) pill.classList.add("corre");
+  };
+  function activar(btn, porUsuario) {
+    btns.forEach(b => {
+      const on = b === btn;
+      b.classList.toggle("active", on);
+      b.setAttribute("aria-selected", String(on));
+      b.tabIndex = on ? 0 : -1;
+      $("#" + b.dataset.tab).classList.toggle("active", on);
+    });
+    moverPill(btn);
+    if (bar.scrollWidth > bar.clientWidth) {
+      bar.scrollTo({ left: btn.offsetLeft - (bar.clientWidth - btn.offsetWidth) / 2, behavior: reduced ? "auto" : "smooth" });
+    }
+    if (porUsuario) detener();
+    correr();
+  }
+  function detener() { auto = false; pill.classList.remove("corre"); }
+
+  btns.forEach(b => b.addEventListener("click", () => activar(b, true)));
+  bar.addEventListener("keydown", e => {
+    const i = btns.indexOf(document.activeElement);
+    if (i < 0) return;
+    const n = btns.length;
+    const j = { ArrowRight: (i + 1) % n, ArrowLeft: (i - 1 + n) % n, Home: 0, End: n - 1 }[e.key];
+    if (j === undefined) return;
     e.preventDefault();
-    const msg = encodeURIComponent(el.dataset.msg || "¡Hola, EDUVO! 👋 Me interesa conocer más sobre sus planeaciones quincenales: costos, qué incluyen, cómo se entregan y qué opciones ofrecen. ¿Podrían compartirme la información, por favor? 😊");
-    window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`,"_blank","noopener");
+    activar(btns[j], true);
+    btns[j].focus();
+  });
+  pill.addEventListener("animationend", () => {
+    if (!auto) return;
+    const i = btns.findIndex(b => b.classList.contains("active"));
+    activar(btns[(i + 1) % btns.length], false);
+  });
+  zona.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") pill.classList.add("pausa"); });
+  zona.addEventListener("pointerleave", () => pill.classList.remove("pausa"));
+  zona.addEventListener("pointerdown", e => { if (!e.target.closest(".tab-btn")) detener(); });
+  zona.addEventListener("focusin", e => { if (e.target.closest(".tab-panel")) detener(); });
+  watchVisible(zona, v => { enVista = v; if (v) correr(); else pill.classList.remove("corre"); }, { threshold: .35 });
+
+  moverPill(btns[0]);
+  addEventListener("resize", () => moverPill(btns.find(b => b.classList.contains("active"))));
+  document.fonts && document.fonts.ready.then(() => moverPill(btns.find(b => b.classList.contains("active"))));
+})();
+
+/* ---- Memorama jugable ---- */
+(() => {
+  const grid = $("#memo"), estado = $("#memoEstado");
+  const FICHAS = [["🌵", "cactus"], ["🦋", "mariposa monarca"], ["🐢", "tortuga"], ["🌽", "maíz"]];
+  let primera = null, bloqueo = false, pares = 0;
+  const repartir = () => {
+    const mazo = [...FICHAS, ...FICHAS].sort(() => Math.random() - .5);
+    pares = 0; primera = null; bloqueo = false;
+    estado.textContent = "¡Pruébalo! Encuentra los pares";
+    grid.replaceChildren(...mazo.map(([emoji, nombre], i) => {
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "memo-carta"; b.dataset.id = emoji;
+      b.setAttribute("aria-label", `Carta ${i + 1}, boca abajo`);
+      b.innerHTML = `<span class="in"><span class="cara frente">?</span><span class="cara dorso">${emoji}</span></span>`;
+      b.addEventListener("click", () => voltear(b, nombre));
+      return b;
+    }));
+  };
+  function voltear(c, nombre) {
+    if (bloqueo || c === primera || c.classList.contains("par")) return;
+    c.classList.add("volteada");
+    c.setAttribute("aria-label", nombre);
+    if (!primera) { primera = c; return; }
+    const otra = primera; primera = null;
+    if (otra.dataset.id === c.dataset.id) {
+      [otra, c].forEach(x => { x.classList.add("par"); x.classList.remove("volteada"); });
+      pares++;
+      estado.textContent = pares === FICHAS.length ? "¡Bien hecho! 🎉" : `¡Par encontrado! ${pares}/${FICHAS.length}`;
+      if (pares === FICHAS.length) setTimeout(repartir, 2600);
+    } else {
+      bloqueo = true;
+      estado.textContent = "Casi… inténtalo otra vez";
+      setTimeout(() => {
+        [otra, c].forEach((x, i) => { x.classList.remove("volteada"); x.setAttribute("aria-label", "Carta boca abajo"); });
+        bloqueo = false;
+      }, 850);
+    }
+  }
+  repartir();
+})();
+
+/* ============================================================
+   FAQ: abrir y cerrar con suavidad
+   ============================================================ */
+$$(".faq").forEach(d => {
+  const s = $("summary", d), c = $(".resp", d);
+  let anim = null;
+  s.addEventListener("click", e => {
+    if (reduced) return;
+    e.preventDefault();
+    if (anim) anim.cancel();
+    const opts = { duration: 380, easing: "cubic-bezier(.22,1,.36,1)" };
+    if (d.open) {
+      d.classList.add("cerrando");
+      anim = c.animate([{ height: c.offsetHeight + "px", opacity: 1 }, { height: "0px", opacity: 0 }], { ...opts, duration: 280 });
+      anim.onfinish = () => { d.open = false; d.classList.remove("cerrando"); anim = null; };
+    } else {
+      d.open = true;
+      anim = c.animate([{ height: "0px", opacity: 0 }, { height: c.offsetHeight + "px", opacity: 1 }], opts);
+      anim.onfinish = () => { anim = null; };
+    }
   });
 });
 
-/* ---- Navbar al hacer scroll ---- */
-const nav = document.getElementById("nav");
-const onScroll = ()=> nav.classList.toggle("scrolled", window.scrollY > 30);
-window.addEventListener("scroll", onScroll, {passive:true});
+/* ---- Tooltip del botón flotante ---- */
+const tip = $("#waTip");
+setTimeout(() => tip.classList.add("show"), 4000);
+setTimeout(() => tip.classList.remove("show"), 12000);
+$("#waFloat").addEventListener("click", () => tip.classList.remove("show"));
+
 onScroll();
-
-/* ---- Menú móvil ---- */
-const mm = document.getElementById("mobileMenu");
-document.getElementById("menuBtn").addEventListener("click",()=>mm.classList.add("open"));
-document.getElementById("closeBtn").addEventListener("click",()=>mm.classList.remove("open"));
-mm.querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>mm.classList.remove("open")));
-
-/* ---- Reveal on scroll ---- */
-const io = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target);} });
-},{threshold:.12, rootMargin:"0px 0px -40px 0px"});
-document.querySelectorAll(".reveal").forEach(el=>io.observe(el));
-
-/* ---- Elemento firma: la planeación se escribe sola (en loop) ---- */
-const rows = [...document.querySelectorAll(".plan-row")];
-const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-function playPlan(){
-  rows.forEach(r=>{
-    r.classList.remove("show");
-    r.querySelector(".check").classList.remove("on");
-  });
-  // forzar reflow para reiniciar animaciones
-  void document.getElementById("planRows").offsetWidth;
-  rows.forEach(r=>{
-    const d = +r.dataset.delay;
-    setTimeout(()=>{
-      r.classList.add("show");
-      setTimeout(()=>r.querySelector(".check").classList.add("on"), 500);
-    }, d);
-  });
-}
-if(reduced){
-  rows.forEach(r=>{ r.classList.add("show"); r.querySelector(".check").classList.add("on"); });
-}else{
-  playPlan();
-  setInterval(playPlan, 9000);
-}
-
-/* ---- Tilt 3D en la tarjeta de planeación (solo desktop) ---- */
-const stage = document.querySelector(".plan-stage");
-const card  = document.getElementById("planCard");
-if(!reduced && window.matchMedia("(pointer:fine)").matches){
-  stage.addEventListener("mousemove",e=>{
-    const r = stage.getBoundingClientRect();
-    const x = (e.clientX - r.left)/r.width - .5;
-    const y = (e.clientY - r.top)/r.height - .5;
-    card.style.transform = `rotateX(${4 - y*8}deg) rotateY(${-7 + x*10}deg)`;
-  });
-  stage.addEventListener("mouseleave",()=>{
-    card.style.transform = "rotateX(4deg) rotateY(-7deg)";
-  });
-}
-
-/* ---- Tabs de materiales ---- */
-const tabBtns = document.querySelectorAll(".tab-btn");
-tabBtns.forEach(btn=>{
-  btn.addEventListener("click",()=>{
-    tabBtns.forEach(b=>{ b.classList.remove("active"); b.setAttribute("aria-selected","false"); });
-    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
-    btn.classList.add("active");
-    btn.setAttribute("aria-selected","true");
-    document.getElementById(btn.dataset.tab).classList.add("active");
-  });
-});
-
-/* ---- Tooltip del botón flotante (aparece tras 4s, se oculta al pasar el hero) ---- */
-const tip = document.getElementById("waTip");
-setTimeout(()=>tip.classList.add("show"), 4000);
-setTimeout(()=>tip.classList.remove("show"), 12000);
+})();
 </script>
 </body>
 </html>
